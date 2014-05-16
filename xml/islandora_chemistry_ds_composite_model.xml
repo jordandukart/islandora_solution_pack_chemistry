@@ -11,11 +11,23 @@
     <form FORMAT_URI="http://www.loc.gov/mods/v3" MIME="text/xml"/>
   </dsTypeModel>
   <dsTypeModel ID="OBJ" optional="false">
-    <form MIME="text/plain"/>
-    <form MIME="application/x-ghemical"/>
-  </dsTypeModel>
-    <dsTypeModel ID="TRANSCRIPTION" optional="false">
-    <form MIME="text/xml"/>
+    <form MIME="text/plain" optional="true"/>
+    <form MIME="application/x-ghemical" optional="true"/>
+    <form MIME="chemical/x-mdl-molfile" optional="true"/>
+    <form MIME="chemical/x-xyz" optional="true"/>
+    <form MIME="chemical/x-pdb" optional="true"/>
+    <form MIME="chemical/x-chem3d" optional="true"/>
+    <form MIME="chemical/x-chemdraw" optional="true"/>
+    <form MIME="chemical/x-cif" optional="true"/>
+    <form MIME="chemical/x-cml" optional="true"/>
+    <form MIME="chemical/x-gamess-input" optional="true"/>
+    <form MIME="application/octet-stream" optional="true"/>
+    <form MIME="chemical/x-gaussian-cube" optional="true"/>
+    <form MIME="chemical/x-gaussian-input" optional="true"/>
+    <form MIME="application/octet-stream" optional="true"/>
+    <form MIME="chemical/x-jcamp-dx" optional="true"/>
+    <form MIME="chemical/x-mopac-input" optional="true"/>
+    <form MIME="application/octet-stream" optional="true"/>
   </dsTypeModel>
   <dsTypeModel ID="TN" optional="false">
     <form MIME="image/jpg"/>

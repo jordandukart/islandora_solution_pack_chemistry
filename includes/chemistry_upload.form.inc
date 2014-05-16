@@ -38,7 +38,7 @@ function islandora_chemistry_upload_form(array $form, array &$form_state) {
     '#title' => t("Add optional thumbnail?"),
     '#default_value' => FALSE,
   );
-  $form['tn'] = array(
+  $form['islandora_chemistry_tn_upload']['tn'] = array(
     '#title' => t('Thumbnail for object'),
     '#type' => 'managed_file',
     '#required' => FALSE,
@@ -69,6 +69,8 @@ function islandora_chemistry_upload_form(array $form, array &$form_state) {
  *   The drupal form state.
  */
 function islandora_chemistry_upload_form_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'islandora', 'includes/mime_detect');
+
   $object = $form_state['islandora']['objects'][0];
   if (empty($object['OBJ'])) {
     $ds = $object->constructDatastream('OBJ', 'M');
@@ -77,30 +79,34 @@ function islandora_chemistry_upload_form_submit(array $form, array &$form_state)
   else {
     $ds = $object['OBJ'];
   }
-  $tei_file = file_load($form_state['values']['file']);
-  $tei_path = drupal_realpath($tei_file->uri);
   $ds->label = $tei_file->filename;
-  $ds->mimetype = "text/plain";
-  $ds->setContentFromFile($tei_path, FALSE);
+
+  $chem_file = file_load($form_state['values']['file']);
+  $chem_path = drupal_realpath($chem_file->uri);
+
+  $mime_detect = new MimeDetect();
+  $ext = $mime_detect->getExtension($object['OBJ']->mimeType);
+  $ds->mimetype = $ext;
+  $ds->setContentFromFile($chem_path, FALSE);
 
   $tn_file = file_load($form_state['values']['tn']);
   if (isset($tn_file->uri)) {
-    $tn_path = drupal_realpath($tn_file->uri);
-    // TODO: dont use imagemagick here, i know there is another way.
-    $imagick = new Imagick($tn_path);
-    $imagick->thumbnailimage(150, NULL);
-    $imagick->setimagefilename($tn_path);
-    $imagick->writeimage();
-
+    if ($form_state['values']['scale_thumbnail']) {
+      islandora_scale_thumbnail($tn_file, 200, 200);
+    }
     if (empty($object['TN'])) {
-      $ds = $object->constructDatastream('TN', 'M');
-      $object->ingestDatastream($ds);
+      $tn = $object->constructDatastream('TN', 'M');
+      $object->ingestDatastream($tn);
     }
     else {
-      $ds = $object['TN'];
+      $tn = $object['TN'];
     }
-    $ds->setContentFromFile($tn_path, FALSE);
-    $ds->label = $tn_file->filename;
-    $ds->mimetype = $tn_file->filemime;
+    $tn->setContentFromFile(drupal_realpath($tn_file->uri), FALSE);
+    if ($tn->label != $tn_file->filename) {
+      $tn->label = $tn_file->filename;
+    }
+    if ($tn->mimetype != $tn_file->filemime) {
+      $tn->mimetype = $tn_file->filemime;
+    }
   }
 }
