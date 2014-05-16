@@ -78,6 +78,9 @@ function islandora_chemistry_islandora_xml_form_builder_forms() {
     'Chemistry MODS form' => array(
       'form_file' => "$module_path/xml/islandora_chemistry_form_mods.xml",
     ),
+    'Chemistry MADS form' => array(
+      'form_file' => "$module_path/xml/islandora_chemistry_form_mads.xml",
+    ),
   );
 }
 
@@ -92,6 +95,14 @@ function islandora_chemistry_islandora_content_model_forms_form_associations() {
       'dsid' => 'MODS',
       'title_field' => array('titleInfo', 'title'),
       'transform' => 'mods_to_dc.xsl',
+      'template' => FALSE,
+    ),
+    'islandora_chemistry_mads_form' => array(
+      'content_model' => 'islandora:sp_chem_CM',
+      'form_name' => 'Chemistry MADS form',
+      'dsid' => 'MADS',
+      'title_field' => array('titleInfo', 'title'),
+      'transform' => 'mads_to_dc.xsl',
       'template' => FALSE,
     ),
   );

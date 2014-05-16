@@ -74,16 +74,15 @@ function islandora_chemistry_upload_form_submit(array $form, array &$form_state)
   else {
     $ds = $object['OBJ'];
   }
-  $ds->label = $tei_file->filename;
+
   $chem_file = file_load($form_state['values']['file']);
   $chem_path = drupal_realpath($chem_file->uri);
-  $mime_detect = new MimeDetect();
-  $ext = $mime_detect->getExtension($object['OBJ']->mimeType);
-  $ds->mimetype = $ext;
+  $ds->label = $chem_file->filename;
+  $ds->mimetype = $object['OBJ']->mimeType;
   $ds->setContentFromFile($chem_path, FALSE);
   $tn_file = file_load($form_state['values']['tn']);
   if (isset($tn_file->uri)) {
-    if ($form_state['values']['scale_thumbnail']) {
+    if ($form_state['values']['tn']) {
       islandora_scale_thumbnail($tn_file, 200, 200);
     }
     if (empty($object['TN'])) {

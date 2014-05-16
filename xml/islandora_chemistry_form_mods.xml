@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<definition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2">
+<definition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="3">
   <properties>
     <root_name>mods</root_name>
     <schema_uri>http://www.loc.gov/standards/mods/v3/mods-3-4.xsd</schema_uri>
@@ -971,15 +971,23 @@
                 <properties>
                   <type>select</type>
                   <access>TRUE</access>
-                  <default_value>North America</default_value>
+                  <collapsed>FALSE</collapsed>
+                  <collapsible>FALSE</collapsible>
+                  <disabled>FALSE</disabled>
+                  <executes_submit_callback>FALSE</executes_submit_callback>
+                  <multiple>FALSE</multiple>
                   <options>
-                    <Asia>Asia</Asia>
+                    <index key=""/>
                     <Africa>Africa</Africa>
+                    <Antarctica>Antarctica</Antarctica>
+                    <Asia>Asia</Asia>
+                    <Australia>Australia</Australia>
                     <Europe>Europe</Europe>
                     <index key="North America">North America</index>
                     <index key="South America">South America</index>
                   </options>
                   <required>FALSE</required>
+                  <resizable>FALSE</resizable>
                   <title>Continent</title>
                   <tree>TRUE</tree>
                   <actions>

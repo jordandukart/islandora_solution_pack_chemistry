@@ -8,9 +8,13 @@
     <form FORMAT_URI="info:fedora/fedora-system:FedoraRELSExt-1.0" MIME="application/rdf+xml"/>
   </dsTypeModel>
   <dsTypeModel ID="MODS" optional="true">
-    <form FORMAT_URI="http://www.loc.gov/mods/v3" MIME="text/xml"/>
+    <form MIME="text/xml"></form>
+  </dsTypeModel>
+  <dsTypeModel ID="MADS" optional="true">
+    <form MIME="text/xml"></form>
   </dsTypeModel>
   <dsTypeModel ID="OBJ" optional="false">
+    <form MIME="text/xml" optional="true"/>
     <form MIME="text/plain" optional="true"/>
     <form MIME="application/x-ghemical" optional="true"/>
     <form MIME="chemical/x-mdl-molfile" optional="true"/>
