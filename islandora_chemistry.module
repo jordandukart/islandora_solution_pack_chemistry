@@ -100,7 +100,7 @@ function islandora_chemistry_islandora_content_model_forms_form_associations() {
 /**
  * Implements hook_islandora_ingest_steps().
  */
-function islandora_markup_editor_islandora_markupEditorCModel_islandora_ingest_steps() {
+function islandora_chemistry_islandora_sp_chem_CM_islandora_ingest_steps() {
   return array(
     'chemistry_upload' => array(
       'weight' => 10,

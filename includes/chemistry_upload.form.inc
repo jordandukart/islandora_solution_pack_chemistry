@@ -19,6 +19,7 @@
 function islandora_chemistry_upload_form(array $form, array &$form_state) {
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
   $extensions = array('mol xyz pdb cdx c3d chm cif cml imp gam out cub gau gal jdx dx mop in txt');
+  $tn_extensions = array('jpg jpeg png');
   $form = array();
   $form['file'] = array(
     '#title' => t('File'),
@@ -33,20 +34,15 @@ function islandora_chemistry_upload_form(array $form, array &$form_state) {
       'file_validate_size' => array($upload_size * 1024 * 1024),
     ),
   );
-  $form['islandora_chemistry_tn_upload'] = array(
-    '#type' => 'checkbox',
-    '#title' => t("Add optional thumbnail?"),
-    '#default_value' => FALSE,
-  );
-  $form['islandora_chemistry_tn_upload']['tn'] = array(
+  $form['tn'] = array(
     '#title' => t('Thumbnail for object'),
     '#type' => 'managed_file',
     '#required' => FALSE,
-    '#description' => t('Select text file to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b><br />This file is optional.', array('@size' => $upload_size, '@ext' => 'txt')),
+    '#description' => t('Select text file to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b><br />This file is optional.', array('@size' => $upload_size, '@ext' => $tn_extensions[0])),
     '#default_value' => isset($form_state['values']['files']) ? $form_state['values']['files'] : NULL,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
-      'file_validate_extensions' => array('jpg jpeg png'),
+      'file_validate_extensions' => $tn_extensions,
       // Assume it's specified in MB.
       'file_validate_size' => array($upload_size * 1024 * 1024),
     ),
@@ -70,7 +66,6 @@ function islandora_chemistry_upload_form(array $form, array &$form_state) {
  */
 function islandora_chemistry_upload_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora', 'includes/mime_detect');
-
   $object = $form_state['islandora']['objects'][0];
   if (empty($object['OBJ'])) {
     $ds = $object->constructDatastream('OBJ', 'M');
@@ -80,15 +75,12 @@ function islandora_chemistry_upload_form_submit(array $form, array &$form_state)
     $ds = $object['OBJ'];
   }
   $ds->label = $tei_file->filename;
-
   $chem_file = file_load($form_state['values']['file']);
   $chem_path = drupal_realpath($chem_file->uri);
-
   $mime_detect = new MimeDetect();
   $ext = $mime_detect->getExtension($object['OBJ']->mimeType);
   $ds->mimetype = $ext;
   $ds->setContentFromFile($chem_path, FALSE);
-
   $tn_file = file_load($form_state['values']['tn']);
   if (isset($tn_file->uri)) {
     if ($form_state['values']['scale_thumbnail']) {
