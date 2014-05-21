@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<dsCompositeModel xmlns="info:fedora/fedora-system:def/dsCompositeModel#">
+  <!-- using this as a guide -->
+  <dsTypeModel ID="DC">
+    <form FORMAT_URI="http://www.openarchives.org/OAI/2.0/oai_dc/" MIME="text/xml"/>
+  </dsTypeModel>
+  <dsTypeModel ID="RELS-EXT" optional="true">
+    <form FORMAT_URI="info:fedora/fedora-system:FedoraRELSExt-1.0" MIME="application/rdf+xml"/>
+  </dsTypeModel>
+  <dsTypeModel ID="MODS" optional="true">
+    <form MIME="text/xml"></form>
+  </dsTypeModel>
+  <dsTypeModel ID="OBJ" optional="false">
+    <form MIME="text/xml" optional="true"/>
+    <form MIME="text/plain" optional="true"/>
+    <form MIME="application/x-ghemical" optional="true"/>
+    <form MIME="chemical/x-mdl-molfile" optional="true"/>
+    <form MIME="chemical/x-xyz" optional="true"/>
+    <form MIME="chemical/x-pdb" optional="true"/>
+    <form MIME="chemical/x-chem3d" optional="true"/>
+    <form MIME="chemical/x-chemdraw" optional="true"/>
+    <form MIME="chemical/x-cif" optional="true"/>
+    <form MIME="chemical/x-cml" optional="true"/>
+    <form MIME="chemical/x-gamess-input" optional="true"/>
+    <form MIME="application/octet-stream" optional="true"/>
+    <form MIME="chemical/x-gaussian-cube" optional="true"/>
+    <form MIME="chemical/x-gaussian-input" optional="true"/>
+    <form MIME="application/octet-stream" optional="true"/>
+    <form MIME="chemical/x-jcamp-dx" optional="true"/>
+    <form MIME="chemical/x-mopac-input" optional="true"/>
+    <form MIME="application/octet-stream" optional="true"/>
+  </dsTypeModel>
+  <dsTypeModel ID="TN" optional="false">
+    <form MIME="image/jpg"/>
+    <form MIME="image/jpeg"/>
+    <form MIME="image/png"/>
+  </dsTypeModel>
+</dsCompositeModel>
