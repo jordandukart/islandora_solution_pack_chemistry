@@ -86,7 +86,7 @@
 
   <target name="test" description="Run simpletest tests for this module via Drush">
     <exec executable="drush">
-      <arg line="test-run --uri=http://localhost --xml=${basedir}/build/test 'Islandora Basic Image'"/>
+      <arg line="test-run --uri=http://localhost --xml=${basedir}/build/test 'Islandora Chemistry Solution Pack'"/>
     </exec>
   </target>
 
