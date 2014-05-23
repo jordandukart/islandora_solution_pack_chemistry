@@ -110,5 +110,11 @@ function islandora_chemistry_islandora_sp_chem_CM_islandora_ingest_steps() {
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
 function islandora_chemistry_islandora_sp_chem_CM_islandora_view_object($object, $page_number, $page_size) {
-  return theme('islandora_chemistry', array('islandora_object' => $object));
+  return array(
+    'islandora_chemistry' =>array(
+      '#type' => 'markup',
+      '#theme' => 'islandora_chemistry',
+      '#islandora_object' => $object,
+    ),
+  );
 }
