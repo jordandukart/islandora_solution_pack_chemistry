@@ -10,6 +10,9 @@
  *
  * @param AbstractObject $object
  *   An object to render.
+ *
+ * @return array
+ *   A renderable array setting up the display.
  */
 function islandora_chemistry_3d_view(AbstractObject $object) {
   $chem_doodle_path = libraries_get_path('ChemDoodleWeb');
