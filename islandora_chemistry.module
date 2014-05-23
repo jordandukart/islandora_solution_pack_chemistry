@@ -110,6 +110,9 @@ function islandora_chemistry_islandora_sp_chem_CM_islandora_ingest_steps() {
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
 function islandora_chemistry_islandora_sp_chem_CM_islandora_view_object($object, $page_number, $page_size) {
+  module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
+  islandora_chemistry_set_title($object);
+
   return array(
     'islandora_chemistry' => array(
       '#type' => 'markup',
@@ -134,6 +137,15 @@ function islandora_chemistry_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/3d-view.tab.inc',
   );
+  $items['islandora/object/%islandora_object/chemistry/output'] = array(
+    'title' => 'Output',
+    'page callback' => 'islandora_chemistry_output_view',
+    'page arguments' => array(2),
+    'access callback' => 'islandora_chemistry_output_view_access',
+    'access arguments' => array(2),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/output-view.tab.inc',
+  );
 
   return $items;
 }
@@ -146,4 +158,14 @@ function islandora_chemistry_menu() {
  */
 function islandora_chemistry_3d_view_access(AbstractObject $object) {
   return isset($object['MOL']) && in_array('islandora:sp_chem_CM', $object->models) &&  islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['MOL']);
+}
+
+/**
+ * Access callback for output view.
+ *
+ * @return bool
+ *   TRUE if the tab should be displayed; otherwise, FALSE.
+ */
+function islandora_chemistry_output_view_access(AbstractObject $object) {
+  return in_array('islandora:sp_chem_CM', $object->models) &&  islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['OBJ']);
 }
