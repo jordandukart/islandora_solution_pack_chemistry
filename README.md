@@ -18,12 +18,14 @@ This module requires the following modules/libraries:
 * [Tuque](https://github.com/islandora/tuque) - The wrapper Islandora uses to communicate with Fedora Commons
 * [OpenBabel](http://openbabel.org) - Required for basic functionality to work. OpenBabel converts the chemical structure files into a common format, creates images from them and extracts useful chemical data.
 * [ChemDoodleWeb](http://web.chemdoodle.com/) - Is used as a viewer for the object and allows a 3D representation of the molecule to be displayed. It is also used as a molecule editor so that structures can be used for searching.
-* [Indigo python API](http://ggasoftware.com/opensource/indigo) - Is required, along with a couple of Python scripts, to create and search for molecular fingerprints. These allow for substructures to be searched and retrieved. Upon ingest the fingerprint of the molecule is stored and so this package has to be present at this point if you want to use substructure searching on all of the molecules. Indigo requires at least Python version 2.6.6 to run. If your OS doesn't have at least this version available from your package manager then you can download a standalone version of Python from [Activestate](https://www.activestate.com/activepython).
+* [Indigo Python API](http://ggasoftware.com/opensource/indigo) - Is required, along with a couple of Python scripts, to create and search for molecular fingerprints. These allow for substructures to be searched and retrieved. Upon ingest the fingerprint of the molecule is stored and so this package has to be present at this point if you want to use substructure searching on all of the molecules. Indigo requires at least Python version 2.6.6 to run. If your OS doesn't have at least this version available from your package manager then you can download a standalone version of Python from [Activestate](https://www.activestate.com/activepython).
 * [Checkmol](http://merian.pch.univie.ac.at/~nhaider/cheminf/cmmm.html) - Required to identify functional groups in the molecule and allow searching based on that.
 
 ## Installation
 
-Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
+For the module itself, install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
+
+For ChemDoodleWeb, [download](http://web.chemdoodle.com/installation/download) and unzip the library such that the `ChemDoodleWeb.js` is located in `sites/all/libraries/ChemDoodleWeb/install/ChemDoodleWeb.js`. 
 
 ## Configuration
 

@@ -111,10 +111,36 @@ function islandora_chemistry_islandora_sp_chem_CM_islandora_ingest_steps() {
  */
 function islandora_chemistry_islandora_sp_chem_CM_islandora_view_object($object, $page_number, $page_size) {
   return array(
-    'islandora_chemistry' =>array(
+    'islandora_chemistry' => array(
       '#type' => 'markup',
       '#theme' => 'islandora_chemistry',
       '#islandora_object' => $object,
     ),
   );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function islandora_chemistry_menu() {
+  $items = array();
+
+  $items['islandora/object/%islandora_object/chemistry/3d-view'] = array(
+    'title' => '3D View',
+    'page callback' => 'islandora_chemistry_3d_view',
+    'page arguments' => array(2),
+    'access callback' => 'islandora_chemistry_3d_view_access',
+    'access arguments' => array(2),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/3d-view.tab.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Access callback for 3D molecule view.
+ */
+function islandora_chemistry_3d_view_access(AbstractObject $object) {
+  return isset($object['MOL']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['MOL']);
 }
