@@ -140,6 +140,9 @@ function islandora_chemistry_menu() {
 
 /**
  * Access callback for 3D molecule view.
+ *
+ * @return bool
+ *   TRUE if the tab should be displayed; otherwise, FALSE.
  */
 function islandora_chemistry_3d_view_access(AbstractObject $object) {
   return isset($object['MOL']) && in_array('islandora:sp_chem_CM', $object->models) &&  islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['MOL']);
