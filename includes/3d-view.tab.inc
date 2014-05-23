@@ -15,6 +15,9 @@
  *   A renderable array setting up the display.
  */
 function islandora_chemistry_3d_view(AbstractObject $object) {
+  module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
+  islandora_chemistry_set_title($object);
+
   $chem_doodle_path = libraries_get_path('ChemDoodleWeb');
   $chem_path = drupal_get_path('module', 'islandora_chemistry');
   $element_id = drupal_html_id('islandora_chemistry_3d_view');
