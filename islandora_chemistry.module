@@ -142,5 +142,5 @@ function islandora_chemistry_menu() {
  * Access callback for 3D molecule view.
  */
 function islandora_chemistry_3d_view_access(AbstractObject $object) {
-  return isset($object['MOL']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['MOL']);
+  return isset($object['MOL']) && in_array('islandora:sp_chem_CM', $object->models) &&  islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['MOL']);
 }
