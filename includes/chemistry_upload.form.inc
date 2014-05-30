@@ -73,7 +73,7 @@ function islandora_chemistry_upload_form_submit(array $form, array &$form_state)
   $chem_file = file_load($form_state['values']['file']);
   $chem_path = drupal_realpath($chem_file->uri);
   $ds->label = $chem_file->filename;
-  $ds->mimetype = $object['OBJ']->mimeType;
+  $ds->mimetype = $chem_file->filemime;
   $ds->setContentFromFile($chem_path, FALSE);
   $tn_file = file_load($form_state['values']['tn']);
   if (isset($tn_file->uri)) {
