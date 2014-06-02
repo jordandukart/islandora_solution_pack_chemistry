@@ -46,3 +46,4 @@ function islandora_chemistry_get_chemistry_mimes() {
     'chemical/x-mopac-input' => 'MOPAC Cartesian',
   );
 }
+

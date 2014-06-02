@@ -49,7 +49,6 @@ function islandora_chemistry_upload_form(array $form, array &$form_state) {
  */
 function islandora_chemistry_upload_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora', 'includes/ingest.form');
-dsm($form_state['values'], 'values for ');
   $object = islandora_ingest_form_get_object($form_state);
   if (empty($object['OBJ'])) {
     $ds = $object->constructDatastream('OBJ', 'M');
