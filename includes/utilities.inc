@@ -16,23 +16,33 @@ function islandora_chemistry_mime_selector() {
     '#title' => t('File Type'),
     '#description' => t('Select the file type for uploaded file(s).'),
     '#type' => 'select',
-    '#options' => array(
-      'chemical/x-mdl-molfile' => 'MDL Molfile',
-      'chemical/x-xyz' => 'XYZ format',
-      'chemical/x-pdb' => 'PDB',
-      'chemical/x-cdx' => 'ChemDraw CDX',
-      'chemical/x-chem3d' => 'ChemDraw 3D',
-      'chemical/x-chemdraw' => 'ChemDraw file',
-      'chemical/x-cif' => 'Crystallographic Information File',
-      'chemical/x-cml' => 'Chemical Markup Language',
-      'chemical/x-gamess-input' => 'GAMESS Input',
-      'chemical/x-gamess-input' => 'GAMESS Output',
-      'chemical/x-gaussian-cube' => 'Gaussian Cube',
-      'chemical/x-gaussian-input' => 'Gaussian 98/03 Cartesian Input',
-      'chemical/x-gaussian' => 'Gaussian 98/03 Output',
-      'chemical/x-jcamp-dx' => 'JCAMP Spectroscopic Data Exchange Format',
-      'chemical/x-jcamp-dx' => 'OpenDX Grid',
-      'chemical/x-mopac-input' => 'MOPAC Cartesian',
-    ),
+    '#options' => islandora_chemistry_get_chemistry_mimes(),
+  );
+}
+
+/**
+ * Get chemistry MIME types.
+ *
+ * @return array
+ *   An array with MIME types as keys and human readable names as values.
+ */
+function islandora_chemistry_get_chemistry_mimes() {
+  return array(
+    'chemical/x-mdl-molfile' => 'MDL Molfile',
+    'chemical/x-xyz' => 'XYZ format',
+    'chemical/x-pdb' => 'PDB',
+    'chemical/x-cdx' => 'ChemDraw CDX',
+    'chemical/x-chem3d' => 'ChemDraw 3D',
+    'chemical/x-chemdraw' => 'ChemDraw file',
+    'chemical/x-cif' => 'Crystallographic Information File',
+    'chemical/x-cml' => 'Chemical Markup Language',
+    'chemical/x-gamess-input' => 'GAMESS Input',
+    'chemical/x-gamess-input' => 'GAMESS Output',
+    'chemical/x-gaussian-cube' => 'Gaussian Cube',
+    'chemical/x-gaussian-input' => 'Gaussian 98/03 Cartesian Input',
+    'chemical/x-gaussian' => 'Gaussian 98/03 Output',
+    'chemical/x-jcamp-dx' => 'JCAMP Spectroscopic Data Exchange Format',
+    'chemical/x-jcamp-dx' => 'OpenDX Grid',
+    'chemical/x-mopac-input' => 'MOPAC Cartesian',
   );
 }
