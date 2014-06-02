@@ -64,7 +64,7 @@ function islandora_chemistry_upload_form_validate(array $form, array &$form_stat
   if (!$values['type_select_check']) {
     module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
     if (!in_array($chem_file_mime, array_keys(islandora_chemistry_get_chemistry_mimes()))) {
-      form_set_error('type_select_check', t("The file's type couldn't be parsed please slect a type."));
+      form_set_error('type_select_check', t("The file's type couldn't be parsed please select a type."));
     }
   }
 }
