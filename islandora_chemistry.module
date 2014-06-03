@@ -112,3 +112,20 @@ function islandora_chemistry_islandora_sp_chem_CM_islandora_ingest_steps() {
 function islandora_chemistry_islandora_sp_chem_CM_islandora_view_object($object, $page_number, $page_size) {
   return theme('islandora_chemistry', array('islandora_object' => $object));
 }
+
+/**
+ * Implements hook_menu().
+ */
+function islandora_chemistry_menu() {
+  return array(
+    'admin/islandora/solution_pack_config/chemistry' => array(
+      'title' => 'Chemistry Solution Pack',
+      'description' => 'Configure Islandora Chemistry solution pack.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('islandora_chemistry_admin_settings_form'),
+      'access arguments' => array('administer site configuration'),
+      'file' => 'includes/admin.form.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+  );
+}
