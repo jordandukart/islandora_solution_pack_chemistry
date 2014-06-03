@@ -29,8 +29,6 @@ class OpenBabelTest extends PHPUnit_Framework_TestCase {
     $files = array_map(array($this, 'addDirectoryPrefix'), scandir(__DIR__ . '/fixtures/chemicals'));
     $dirs = array_filter($files, 'is_dir');
     $bad = array_map(array($this, 'addDirectoryPrefix'), array(
-      // Bad header.
-      'example.cdx',
       // Unsupported as OpenBabel input.
       'example.inp',
     ));
