@@ -86,8 +86,7 @@ function islandora_chemistry_upload_file_form_validate($form, &$form_state) {
  *   An array containing the Drupal form state.
  */
 function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  module_load_include('inc', 'islandora_chemistry_zip_importer', 'includes/importer');
+  $tuque = islandora_get_tuque_connection();
   $collection = islandora_object_load('islandora:chemistry_collection');
   $policy = new CollectionPolicy($collection['COLLECTION_POLICY']->content);
   $policy_content_models = $policy->getContentModels();
