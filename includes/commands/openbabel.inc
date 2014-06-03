@@ -404,7 +404,6 @@ class Options implements ArrayAccess {
   protected $options = array();
 
   /**
-t
    * Defines default option definitions based on the options type.
    *
    * The option definitions can optionally overwrite these defaults.
@@ -446,6 +445,9 @@ t
     // @codingStandardsIgnoreEnd
   }
 
+  /**
+   * Serialize a string option.
+   */
   public static function defaultSerializeSingleValue($option, $value) {
     $def = static::$optionDefinitions[$option] + array(
       'length' => 'short',
@@ -454,6 +456,9 @@ t
       "-{$option}{$value}" :
       "--{$option} \"{$value}\"";
   }
+  /**
+   * Serialize a boolean flag.
+   */
   public static function defaultSerializeBoolean($option, $value) {
     $def = static::$optionDefinitions[$option] + array(
       'length' => 'short',
@@ -464,6 +469,9 @@ t
         "--{$option}") :
       '';
   }
+  /**
+   * Validate a select; ensure the value is in the list of options.
+   */
   public static function defaultValidateSelect($option, $value) {
     return in_array($value, static::$optionDefinitions[$option]['options']);
   }
@@ -732,16 +740,19 @@ t
 /**
  * Calls the OpenBabel CLI with the stored options.
  *
- * @param string $filename
+ * @param string $file
  *   A filename to be transformed.
  * @param Options $options
  *   The options to pass to the OpenBabel CLI.
+ * @param string $executable_path
+ *   An optional path to use. The default is to use the value of the
+ *   "islandora_chemistry_openbabel" Drupal variable.
  *
  * @return string
  *   The output of the command executed.
  */
 function execute($file, Options $options, $executable_path = NULL) {
-  if ($executable_path === NULL ) {
+  if ($executable_path === NULL) {
     $executable_path = variable_get('islandora_chemistry_openbabel', '/usr/bin/obabel');
   }
 
@@ -752,7 +763,7 @@ function execute($file, Options $options, $executable_path = NULL) {
     $desc_spec = array(
       0 => array('pipe', 'r'),
       1 => array('pipe', 'w'),
-      2 => array('pipe', 'w')
+      2 => array('pipe', 'w'),
     );
     $proc = proc_open($command, $desc_spec, $pipes);
     fclose($pipes[0]);

@@ -10,21 +10,34 @@
 require_once __DIR__ . '/../includes/commands/openbabel.inc';
 
 class OpenBabelTest extends PHPUnit_Framework_TestCase {
-  function setUp() {
+  /**
+   * Inherits.
+   */
+  public function setUp() {
     $this->tmps = array();
   }
 
-  function tearDown() {
+  /**
+   * Inherits.
+   */
+  public function tearDown() {
     foreach ($this->tmps as $tmp) {
       @unlink($tmp);
     }
   }
-  function tmp()
-  {
-      $this->tmps[] = $tmp = tempnam(sys_get_temp_dir(), 'chem_test');
-      unlink($tmp);
-      return $tmp;
+
+  /**
+   * Temp file helper.
+   */
+  protected function tmp() {
+    $this->tmps[] = $tmp = tempnam(sys_get_temp_dir(), 'chem_test');
+    unlink($tmp);
+    return $tmp;
   }
+
+  /**
+   * Get chemical fixtures/samples.
+   */
   protected function getSamples() {
     $files = array_map(array($this, 'addDirectoryPrefix'), scandir(__DIR__ . '/fixtures/chemicals'));
     $dirs = array_filter($files, 'is_dir');
@@ -34,15 +47,23 @@ class OpenBabelTest extends PHPUnit_Framework_TestCase {
     ));
     return array_diff($files, $dirs, $bad);
   }
+
+  /**
+   * PHP's scandir() is silly, and doesn't prefix files... Let's.
+   */
   protected function addDirectoryPrefix($file) {
     return __DIR__ . "/fixtures/chemicals/$file";
   }
 
+  /**
+   * Test InchiKey output for separate molecules, as used in D6 code.
+   *
+   * @see https://github.com/discoverygarden/islandora_solution_pack_chemistry/blob/453a885b70c1396a807b4160dcbb2426c8ec1875/chem.inc#L432
+   */
   public function testOutputSeparateInchi() {
-    // exec("obabel \"$file\" -oinchi --separate -xK", $inchi_key, $returnValue2)
     $options = new \Islandora\Chemistry\OpenBabel\Options(array(
       'o' => 'inchi',
-      'separate' => true,
+      'separate' => TRUE,
       'x' => 'K',
     ));
     $no_separate = array(
@@ -63,6 +84,12 @@ class OpenBabelTest extends PHPUnit_Framework_TestCase {
     }
   }
 
+  /**
+   * Test InchiKey output, as used in D6 code.
+   *
+   * @see https://github.com/discoverygarden/islandora_solution_pack_chemistry/blob/453a885b70c1396a807b4160dcbb2426c8ec1875/islandora_chem_sp_search.inc#L112
+   * @see https://github.com/discoverygarden/islandora_solution_pack_chemistry/blob/453a885b70c1396a807b4160dcbb2426c8ec1875/chem.inc#L435
+   */
   public function testOutputInchi() {
     // exec("obabel \"$file\" -oinchi -xK", $inchi_key)
     // exec("obabel \"$file\" -oinchi -xK", $inchi_key, $returnValue2)
@@ -84,10 +111,15 @@ class OpenBabelTest extends PHPUnit_Framework_TestCase {
     }
   }
 
+  /**
+   * Test output of MOL files, as used in D6 code.
+   *
+   * @see https://github.com/discoverygarden/islandora_solution_pack_chemistry/blob/453a885b70c1396a807b4160dcbb2426c8ec1875/chem.inc#L345
+   * @see https://github.com/discoverygarden/islandora_solution_pack_chemistry/blob/453a885b70c1396a807b4160dcbb2426c8ec1875/chem.inc#L441
+   * @see https://github.com/discoverygarden/islandora_solution_pack_chemistry/blob/453a885b70c1396a807b4160dcbb2426c8ec1875/islandora_chem_sp_search.inc#L135
+   * @see https://github.com/discoverygarden/islandora_solution_pack_chemistry/blob/453a885b70c1396a807b4160dcbb2426c8ec1875/islandora_chem_sp_search.inc#L161
+   */
   public function testOutputMol() {
-    // exec("obabel \"$file\" -omol -O\"$file\"")
-    // exec("obabel \"$file\" -omol -O/tmp/checkmol.mol", $checkreturn, $returnValue3)
-    // exec("obabel \"$file\" -omol -O/tmp/tmp2.mol")
     $temp_file = $this->tmp();
     $options = new \Islandora\Chemistry\OpenBabel\Options(array(
       'o' => 'mol',
@@ -102,7 +134,6 @@ class OpenBabelTest extends PHPUnit_Framework_TestCase {
       $this->assertFileExists($temp_file, 'Mol file was created.');
     }
 
-    // exec("obabel \"$file\" --title -omol -xw -O\"$filename\"", $returnValue)
     $this->tmps[] = $temp_file = tempnam(sys_get_temp_dir(), 'mol');
     $options = new \Islandora\Chemistry\OpenBabel\Options(array(
       'title' => '',
@@ -120,8 +151,12 @@ class OpenBabelTest extends PHPUnit_Framework_TestCase {
     }
   }
 
+  /**
+   * Test output of PNGs, as used in D6 code.
+   *
+   * @see https://github.com/discoverygarden/islandora_solution_pack_chemistry/blob/453a885b70c1396a807b4160dcbb2426c8ec1875/chem.inc#L381
+   */
   public function testOutputPng() {
-    // exec("obabel \"$file\" -opng -O\"$file\".png --title -xw -c", $returnvalue)
     $temp_file = $this->tmp();
     $options = new \Islandora\Chemistry\OpenBabel\Options(array(
       'o' => 'png',
@@ -139,8 +174,12 @@ class OpenBabelTest extends PHPUnit_Framework_TestCase {
     }
   }
 
+  /**
+   * Test output of SMI, as used in D6 code.
+   *
+   * @see https://github.com/discoverygarden/islandora_solution_pack_chemistry/blob/453a885b70c1396a807b4160dcbb2426c8ec1875/chem.inc#L460
+   */
   public function testOutputSmi() {
-    // exec("obabel \"$file\" -osmi -O /tmp/checkmol.smi -xc", $return, $returnValue5)
     $temp_file = $this->tmp();
     $options = new \Islandora\Chemistry\OpenBabel\Options(array(
       'o' => 'smi',
