@@ -1,0 +1,161 @@
+<?php
+
+/**
+ * @file
+ * Test class for CLI adapter.
+ *
+ * We assume that OpenBabel has been installed in /usr/bin/obabel
+ */
+
+require_once __DIR__ . '/../includes/commands/openbabel.inc';
+
+class OpenBabelTest extends PHPUnit_Framework_TestCase {
+  function setUp() {
+    $this->tmps = array();
+  }
+
+  function tearDown() {
+    foreach ($this->tmps as $tmp) {
+      @unlink($tmp);
+    }
+  }
+  function tmp()
+  {
+      $this->tmps[] = $tmp = tempnam(sys_get_temp_dir(), 'chem_test');
+      unlink($tmp);
+      return $tmp;
+  }
+  protected function getSamples() {
+    $files = array_map(array($this, 'addDirectoryPrefix'), scandir(__DIR__ . '/fixtures/chemicals'));
+    $dirs = array_filter($files, 'is_dir');
+    $bad = array_map(array($this, 'addDirectoryPrefix'), array(
+      // Bad header.
+      'example.cdx',
+      // Unsupported as OpenBabel input.
+      'example.inp',
+    ));
+    return array_diff($files, $dirs, $bad);
+  }
+  protected function addDirectoryPrefix($file) {
+    return __DIR__ . "/fixtures/chemicals/$file";
+  }
+
+  public function testOutputSeparateInchi() {
+    // exec("obabel \"$file\" -oinchi --separate -xK", $inchi_key, $returnValue2)
+    $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+      'o' => 'inchi',
+      'separate' => true,
+      'x' => 'K',
+    ));
+    $no_separate = array(
+      // Seems to break when trying to separate...
+      'example.mop',
+    );
+    foreach (array_diff($this->getSamples(), array_map(array($this, 'addDirectoryPrefix'), $no_separate)) as $fixture) {
+      $result = \Islandora\Chemistry\OpenBabel\execute(
+        $fixture,
+        $options,
+        '/usr/bin/obabel'
+      );
+      if (!empty($result)) {
+        foreach (explode("\n", $result) as $key) {
+          $this->assertRegExp('/^.{14}-.{9}.-.$/', $key, "Bad key from $fixture.");
+        }
+      }
+    }
+  }
+
+  public function testOutputInchi() {
+    // exec("obabel \"$file\" -oinchi -xK", $inchi_key)
+    // exec("obabel \"$file\" -oinchi -xK", $inchi_key, $returnValue2)
+    $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+      'o' => 'inchi',
+      'x' => 'K',
+    ));
+    foreach ($this->getSamples() as $fixture) {
+      $result = \Islandora\Chemistry\OpenBabel\execute(
+        $fixture,
+        $options,
+        '/usr/bin/obabel'
+      );
+      if (!empty($result)) {
+        foreach (explode("\n", $result) as $key) {
+          $this->assertRegExp('/^.{14}-.{9}.-.$/', $key, "Bad key from $fixture.");
+        }
+      }
+    }
+  }
+
+  public function testOutputMol() {
+    // exec("obabel \"$file\" -omol -O\"$file\"")
+    // exec("obabel \"$file\" -omol -O/tmp/checkmol.mol", $checkreturn, $returnValue3)
+    // exec("obabel \"$file\" -omol -O/tmp/tmp2.mol")
+    $temp_file = $this->tmp();
+    $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+      'o' => 'mol',
+      'O' => $temp_file,
+    ));
+    foreach ($this->getSamples() as $fixture) {
+      $result = \Islandora\Chemistry\OpenBabel\execute(
+        $fixture,
+        $options,
+        '/usr/bin/obabel'
+      );
+      $this->assertFileExists($temp_file, 'Mol file was created.');
+    }
+
+    // exec("obabel \"$file\" --title -omol -xw -O\"$filename\"", $returnValue)
+    $this->tmps[] = $temp_file = tempnam(sys_get_temp_dir(), 'mol');
+    $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+      'title' => '',
+      'o' => 'mol',
+      'O' => $temp_file,
+      'x' => 'w',
+    ));
+    foreach ($this->getSamples() as $fixture) {
+      $result = \Islandora\Chemistry\OpenBabel\execute(
+        $fixture,
+        $options,
+        '/usr/bin/obabel'
+      );
+      $this->assertFileExists($temp_file, 'Mol file was created.');
+    }
+  }
+
+  public function testOutputPng() {
+    // exec("obabel \"$file\" -opng -O\"$file\".png --title -xw -c", $returnvalue)
+    $temp_file = $this->tmp();
+    $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+      'o' => 'png',
+      'O' => $temp_file,
+      'x' => 'w',
+      'c' => TRUE,
+    ));
+    foreach ($this->getSamples() as $fixture) {
+      $result = \Islandora\Chemistry\OpenBabel\execute(
+        $fixture,
+        $options,
+        '/usr/bin/obabel'
+      );
+      $this->assertFileExists($temp_file, 'Png file was created.');
+    }
+  }
+
+  public function testOutputSmi() {
+    // exec("obabel \"$file\" -osmi -O /tmp/checkmol.smi -xc", $return, $returnValue5)
+    $temp_file = $this->tmp();
+    $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+      'o' => 'smi',
+      'O' => $temp_file,
+      'x' => 'c',
+    ));
+    foreach ($this->getSamples() as $fixture) {
+      $result = \Islandora\Chemistry\OpenBabel\execute(
+        $fixture,
+        $options,
+        '/usr/bin/obabel'
+      );
+      $this->assertFileExists($temp_file, 'SMI file was created.');
+    }
+  }
+}
