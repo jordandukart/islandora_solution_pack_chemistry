@@ -13,23 +13,46 @@ function islandora_chemistry_derive_mol(AbstractObject $object, $force = FALSE, 
     return;
   }
 
-  islandora_chemistry_derive_datastream_from_openbabel($object, 'OBJ', 'MOL', 'chemical/x-mdl-molfile', array(
-    'o' => 'mol',
-  ));
+  $to_return = array(
+    'success' => FALSE,
+    'messages' => array(),
+  );
+  $subs = array(
+    '@datastream' => 'MOL',
+    '@id' => $object->id,
+  );
+  try {
+    islandora_chemistry_derive_datastream_from_openbabel($object, 'OBJ', 'MOL', 'chemical/x-mdl-molfile', array(
+      'o' => 'mol',
+    ));
+    $to_return['success'] = TRUE;
+    $to_return['messages'][] = array(
+      'message' => t('Generated and added @datastream derivative to @id.'),
+      'message_sub' => $subs,
+      'type' => 'dsm',
+    );
+  }
+  catch (IslandoraChemistryDerivativeException $e) {
+    $to_return['messages'][] = array(
+      'message' => t('Failed when generating @datastream to add to @id.'),
+      'message_sub' => $subs,
+      'type' => 'dsm',
+    );
+  }
 }
 
 /**
  * Derivative callback to generate TN from the OBJ.
  */
 function islandora_chemistry_derive_tn(AbstractObject $object, $force = FALSE, $hook = array()) {
-  islandora_chemistry_derive_image($object, 'TN', 100, $force, $hook);
+  return islandora_chemistry_derive_image($object, 'TN', 100, $force, $hook);
 }
 
 /**
  * Derivative callback to generate MEDIUM from the OBJ.
  */
 function islandora_chemistry_derive_medium(AbstractObject $object, $force = FALSE, $hook = array()) {
-  islandora_chemistry_derive_image($object, 'MEDIUM', 250, $force, $hook);
+  return islandora_chemistry_derive_image($object, 'MEDIUM', 250, $force, $hook);
 }
 
 /**
@@ -39,9 +62,36 @@ function islandora_chemistry_derive_image(AbstractObject $object, $dest, $width,
   if (isset($object[$dest]) && !$force) {
     return;
   }
-  $output_file = islandora_chemistry_derive_jpeg_from_svg($object, $width);
-  islandora_chemistry_derive_add_datastream($object, $dest, $output_file);
-  file_delete($output_file);
+
+  $to_return = array(
+    'success' => FALSE,
+    'messages' => array(),
+  );
+  $subs = array(
+    '@datastream' => $dest,
+    '@id' => $object->id,
+  );
+  try {
+    $output_file = islandora_chemistry_derive_jpeg_from_svg($object, $width);
+    islandora_chemistry_derive_add_datastream($object, $dest, $output_file);
+    $to_return['success'] = TRUE;
+    $to_return['messages'][] = array(
+      'message' => t('Generated and added @datastream derivative to @id.'),
+      'message_sub' => $subs,
+      'type' => 'dsm',
+    );
+  }
+  catch (IslandoraChemistryDerivativeException $e) {
+    $to_return['messages'][] = array(
+      'message' => t('Failed when generating @datastream to add to @id.'),
+      'message_sub' => $subs,
+      'type' => 'dsm',
+    );
+  }
+  if (isset($output_file)) {
+    file_delete($output_file);
+  }
+  return $to_return;
 }
 
 /**
@@ -51,9 +101,8 @@ function islandora_chemistry_derive_jpeg_from_svg(AbstractObject $object, $width
   $svg_file = islandora_chemistry_derive_file_from_openbabel($object, 'OBJ', 'image/svg+xml', array(
     // "png" doesn't work... Guess we'll convert 'em to jpegs...
     'o' => 'svg',
-    'z' => TRUE,
   ));
-  $svg_file = file_move($svg_file, file_create_filename('temp.svgz', 'temporary://'));
+  $svg_file = file_move($svg_file, file_create_filename('temp.svg', 'temporary://'));
 
   // Convert to JPEG, based on the file extension.
   // XXX: Cannot use Drupal's image toolkit to to lack of SVG support.
@@ -108,6 +157,9 @@ function islandora_chemistry_derive_file_from_openbabel(AbstractObject $object, 
   $output_file = islandora_temp_file_entry($name, $dest_mime);
 
   file_delete($file);
+  if (!file_exists($output_file->uri) || filesize($output_file->uri) === 0) {
+    throw new IslandoraChemistryDerivativeException('Failed to transform.');
+  }
   return file_save($output_file);
 }
 
@@ -193,4 +245,7 @@ function islandora_chemistry_imagemagick_convert($src, $dest, $args) {
     return FALSE;
   }
   return $dest;
+}
+
+class IslandoraChemistryDerivativeException extends Exception {
 }
