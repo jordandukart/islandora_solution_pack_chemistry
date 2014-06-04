@@ -112,3 +112,32 @@ function islandora_chemistry_islandora_sp_chem_CM_islandora_ingest_steps() {
 function islandora_chemistry_islandora_sp_chem_CM_islandora_view_object($object, $page_number, $page_size) {
   return theme('islandora_chemistry', array('islandora_object' => $object));
 }
+
+/**
+ * Implemenets hook_block_info().
+ */
+function islandora_chemistry_block_info() {
+  return array(
+    'islandora_chemistry_upload' => array(
+      'info' => t('Islandora Chemistry Upload A File'),
+      'cache' => DRUPAL_NO_CACHE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function islandora_chemistry_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'islandora_chemistry_upload':
+      if (user_access(ISLANDORA_INGEST)) {
+        module_load_include('inc', 'islandora_chemistry', 'includes/blocks');
+        $block['subject'] = t('Upload Structures');
+        $block['content'] = drupal_get_form('islandora_chemistry_upload_file_form');
+      }
+      break;
+  }
+  return $block;
+}
