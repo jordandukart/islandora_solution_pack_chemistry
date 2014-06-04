@@ -1,6 +1,8 @@
 name = "Islandora Chemistry Solution Pack"
 description = "A default Islandora module to handle storing chemical structures"
 dependencies[] = islandora
+dependencies[] = islandora_basic_collection
+files[] = includes/importer.inc
 package = Islandora Solution Packs
 version = 7.x-dev
 core = 7.x
