@@ -101,7 +101,7 @@ function islandora_chemistry_get_rdf_from_chemspider($inchi_key) {
 }
 
 /**
- * Searches for an IUPAC name and ChemSpider URL for an InChI key.
+ * Searches for an IUPAC name and ChemSpider URL from an InChI key.
  *
  * @param string $inchi_key
  *   A string representing an InChI key.
