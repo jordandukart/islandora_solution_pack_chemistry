@@ -22,3 +22,26 @@ function islandora_chemistry_uninstall() {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   islandora_install_solution_pack('islandora_chemistry', 'uninstall');
 }
+
+/**
+ * Implements hook_requirements().
+ */
+function islandora_chemistry_requirements() {
+  if (!libraries_get_path('indigo-python')) {
+    $t = get_t();
+    $readme_link = l(
+      $t('README'),
+      drupal_get_path('module', 'islandora_chemistry') . '/README.md'
+    );
+    return array(
+      'indigo-python' => array(
+        'title' => $t('Indigo'),
+        'description' => $t(
+          'Indigo is missing, please consult the !readme for installation instructions.',
+          array('!readme' => $readme_link)
+        ),
+        'severity' => REQUIREMENT_ERROR,
+      ),
+    );
+  }
+}
