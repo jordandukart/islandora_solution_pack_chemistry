@@ -114,7 +114,7 @@ function islandora_chemistry_islandora_sp_chem_CM_islandora_view_object($object,
 }
 
 /**
- * Implemenets hook_block_info().
+ * Implements hook_block_info().
  */
 function islandora_chemistry_block_info() {
   return array(
@@ -140,4 +140,57 @@ function islandora_chemistry_block_view($delta = '') {
       break;
   }
   return $block;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function islandora_chemistry_menu() {
+  return array(
+    'admin/islandora/solution_pack_config/chemistry' => array(
+      'title' => 'Chemistry Solution Pack',
+      'description' => 'Configure Islandora Chemistry solution pack.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('islandora_chemistry_admin_settings_form'),
+      'access arguments' => array('administer site configuration'),
+      'file' => 'includes/admin.form.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+  );
+}
+
+/**
+ * Implements hook_CMODEL_PID_islandora_derivative().
+ */
+function islandora_chemistry_islandora_sp_chem_cm_islandora_derivative() {
+  $derivatives = array();
+
+  $module_path = drupal_get_path('module', 'islandora_chemistry');
+
+  $derivatives['islandora_chemistry_mol'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'MOL',
+    'function' => array(
+      'islandora_chemistry_derive_mol',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+  $derivatives['islandora_chemistry_medium'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'MEDIUM',
+    'function' => array(
+      'islandora_chemistry_derive_medium',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+  $derivatives['islandora_chemistry_tn'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'TN',
+    'function' => array(
+      'islandora_chemistry_derive_tn',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+
+  return $derivatives;
 }
