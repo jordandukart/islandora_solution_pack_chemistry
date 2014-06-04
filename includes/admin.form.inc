@@ -60,7 +60,7 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
 }
 
 /**
- * Ajax callback for the Tesseract textfield.
+ * Ajax callback for the executable path textfields.
  *
  * @param array $form
  *   The Drupal form definition.
