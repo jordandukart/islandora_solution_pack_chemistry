@@ -23,12 +23,12 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
   $get_default_value = function($name, $default) use(&$form_state) {
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : variable_get($name, $default);
   };
-  $python = $get_default_value('islandora_chemistry_python', '/usr/bin/python2.7');
-  $obabel = $get_default_value('islandora_chemistry_openbabel', '/usr/bin/obabel');
+  $python = $get_default_value('islandora_chemistry_python', 'python');
+  $obabel = $get_default_value('islandora_chemistry_openbabel', 'obabel');
   $form += array(
-    '#prefix' => '<div id="obabel-wrapper">',
-    '#suffix' => '</div>',
     'islandora_chemistry_openbabel' => array(
+      '#prefix' => '<div id="obabel-wrapper">',
+      '#suffix' => '</div>',
       '#type' => 'textfield',
       '#title' => t('OpenBabel'),
       '#description' => t('OpenBabel executable path<br/>!msg', array(
@@ -42,6 +42,8 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
       ),
     ),
     'islandora_chemistry_python' => array(
+      '#prefix' => '<div id="python-wrapper">',
+      '#suffix' => '</div>',
       '#type' => 'textfield',
       '#title' => t('Python'),
       '#description' => t('Python executable path<br/>!msg', array(
@@ -71,5 +73,5 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
  *   The element to render as part the ajax callback.
  */
 function islandora_chemistry_admin_settings_form_ajax_callback(array $form, array $form_state) {
-  return $form;
+  return drupal_array_get_nested_value($form, $form_state['triggering_element']['#parents']);
 }
