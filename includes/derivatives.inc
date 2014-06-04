@@ -39,6 +39,8 @@ function islandora_chemistry_derive_mol(AbstractObject $object, $force = FALSE, 
       'type' => 'dsm',
     );
   }
+
+  return $to_return;
 }
 
 /**
