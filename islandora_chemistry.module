@@ -129,3 +129,39 @@ function islandora_chemistry_menu() {
     ),
   );
 }
+
+/**
+ * Implements hook_CMODEL_PID_islandora_derivative().
+ */
+function islandora_chemistry_islandora_sp_chem_cm_islandora_derivative() {
+  $derivatives = array();
+
+  $module_path = drupal_get_path('module', 'islandora_chemistry');
+
+  $derivatives['islandora_chemistry_mol'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'MOL',
+    'function' => array(
+      'islandora_chemistry_derive_mol',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+  $derivatives['islandora_chemistry_medium'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'MEDIUM',
+    'function' => array(
+      'islandora_chemistry_derive_medium',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+  $derivatives['islandora_chemistry_tn'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'TN',
+    'function' => array(
+      'islandora_chemistry_derive_tn',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+
+  return $derivatives;
+}

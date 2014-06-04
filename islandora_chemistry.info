@@ -4,3 +4,4 @@ dependencies[] = islandora
 package = Islandora Solution Packs
 version = 7.x-dev
 core = 7.x
+files[] = includes/commands/openbabel.inc
