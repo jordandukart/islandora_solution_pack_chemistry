@@ -753,7 +753,7 @@ class Options implements ArrayAccess {
  */
 function execute($file, Options $options, $executable_path = NULL) {
   if ($executable_path === NULL) {
-    $executable_path = variable_get('islandora_chemistry_openbabel', '/usr/bin/obabel');
+    $executable_path = variable_get('islandora_chemistry_openbabel', 'obabel');
   }
 
   if (is_executable($executable_path)) {
