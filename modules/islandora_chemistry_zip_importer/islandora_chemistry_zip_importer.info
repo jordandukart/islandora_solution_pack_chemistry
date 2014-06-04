@@ -1,9 +1,0 @@
-name = "Islandora Chemistry ZIP Importer"
-description = "Allow for a ZIP containing chemistry objects to be ingested"
-dependencies[] = islandora
-dependencies[] = islandora_importer
-dependencies[] = islandora_chemistry
-files[] = includes/importer.inc
-package = Islandora Tools
-version = 7.x-dev
-core = 7.x
