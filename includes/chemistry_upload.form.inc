@@ -61,7 +61,7 @@ function islandora_chemistry_upload_form_validate(array $form, array &$form_stat
   $values = &$form_state['values'];
   $chem_file = file_load($values['file']);
   $chem_file_mime = &$chem_file->filemime;
-  if (!$values['type_select_check']) {
+  if ($chem_file && !$values['type_select_check']) {
     module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
     if (!in_array($chem_file_mime, array_keys(islandora_chemistry_get_chemistry_mimes()))) {
       form_set_error('type_select_check', t("The file's type couldn't be parsed please select a type."));
