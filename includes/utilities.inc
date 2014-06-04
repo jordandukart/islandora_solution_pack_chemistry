@@ -37,12 +37,11 @@ function islandora_chemistry_get_chemistry_mimes() {
     'chemical/x-cif' => 'Crystallographic Information File',
     'chemical/x-cml' => 'Chemical Markup Language',
     'chemical/x-gamess-input' => 'GAMESS Input',
-    'chemical/x-gamess-input' => 'GAMESS Output',
+    'chemical/x-gamess-output' => 'GAMESS Output',
     'chemical/x-gaussian-cube' => 'Gaussian Cube',
     'chemical/x-gaussian-input' => 'Gaussian 98/03 Cartesian Input',
-    'chemical/x-gaussian' => 'Gaussian 98/03 Output',
-    'chemical/x-jcamp-dx' => 'JCAMP Spectroscopic Data Exchange Format',
-    'chemical/x-jcamp-dx' => 'OpenDX Grid',
+    'chemical/x-gaussian-log' => 'Gaussian 98/03 Output',
+    'chemical/x-jcamp-dx' => 'JCAMP Spectroscopic Data Exchange Format or OpenDX Grid',
     'chemical/x-mopac-input' => 'MOPAC Cartesian',
   );
 }
