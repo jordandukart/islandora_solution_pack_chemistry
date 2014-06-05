@@ -61,7 +61,7 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
     'islandora_chemistry_cmmmsrv' => array(
       '#type' => 'fieldset',
       '#title' => t('Checkmol/Matchmol Server Information'),
-      '#description' => (@islandora_chemistry_admin_cmmmsrv_available($cmmmsrv_host, $cmmmsrv_port, 5) ?
+      '#description' => filter_xss(@islandora_chemistry_admin_cmmmsrv_available($cmmmsrv_host, $cmmmsrv_port, 5) ?
         t('!imgThe server is available.', array(
           '!img' => theme_image(array('path' => 'misc/watchdog-ok.png', 'attributes' => array())),
         )) :
@@ -140,8 +140,8 @@ function islandora_chemistry_admin_settings_form_cmmmsrv_ajax_callback(array $fo
  *
  * @return bool
  *   TRUE if it appeared that we could connect, and it responded in a manner
- *   similar to that of a cmmmsrv daemon in a timely fashion (~5 seconds);
- *   otherwise, FALSE.
+ *   similar to that of a cmmmsrv daemon in a timely fashion (about five
+ *   seconds); otherwise, FALSE.
  */
 function islandora_chemistry_admin_cmmmsrv_available($host, $port) {
   module_load_include('inc', 'islandora_chemistry', 'includes/commands/checkmol');
