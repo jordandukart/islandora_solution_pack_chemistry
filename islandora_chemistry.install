@@ -21,6 +21,11 @@ function islandora_chemistry_install() {
 function islandora_chemistry_uninstall() {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   islandora_install_solution_pack('islandora_chemistry', 'uninstall');
+  $variables = array(
+    'islandora_chemistry_python',
+    'islandora_chemistry_openbabel',
+  );
+  array_walk($variables, 'variable_del');
 }
 
 /**
@@ -68,7 +73,7 @@ function islandora_chemistry_schema() {
     'primary key' => array('id'),
     'indexes' => array('inchikey' => array('inchikey')),
   );
-  for ($i = 0; $i <= 116; $i++){
+  for ($i = 0; $i <= 116; $i++) {
     $schema['islandora_chemistry_fingerprints']['fields']["fp$i"] = array(
       'type' => 'int',
       'size' => 'big',
