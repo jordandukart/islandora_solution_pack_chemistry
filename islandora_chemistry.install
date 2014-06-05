@@ -57,7 +57,7 @@ function islandora_chemistry_requirements() {
 function islandora_chemistry_schema() {
   $schema = array();
   $schema['islandora_chemistry_fingerprints'] = array(
-    'description' => 'Table that stores lists of IP ranges.',
+    'description' => 'Table of chimcal fingerprints.',
     'fields' => array(
       'id' => array(
         'type' => 'serial',
@@ -74,7 +74,7 @@ function islandora_chemistry_schema() {
     'indexes' => array('inchikey' => array('inchikey')),
   );
   for ($i = 0; $i <= 116; $i++) {
-    $schema['islandora_chemistry_fingerprints']['fields']["fp$i"] = array(
+    $schema['islandora_chemistry_fingerprints']['fields']["fingerprint_$i"] = array(
       'type' => 'int',
       'size' => 'big',
       'length' => 64,

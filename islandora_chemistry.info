@@ -6,6 +6,7 @@ dependencies[] = islandora_basic_collection
 dependencies[] = imagemagick
 files[] = includes/importer.inc
 files[] = includes/commands/openbabel.inc
+files[] = tests/fingerprint.test
 package = Islandora Solution Packs
 version = 7.x-dev
 core = 7.x

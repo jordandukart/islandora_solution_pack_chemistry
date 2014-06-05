@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * @file
+ * Tests for fingerprint functionality.
+ */
+
+/**
+ * Unit tests for fingerprint integration.
+ */
+class FingerprintTests extends DrupalWebTestCase {
+  protected $inchikey = 'UHOVQNZJYSORNB-UHFFFAOYSA-N';
+
+  /**
+   * Sets up the requirements for this test.
+   *
+   * @see DrupalUnitTestCase::setUp()
+   */
+  public function setUp() {
+    parent::setUp('islandora_chemistry');
+  }
+
+  /**
+   * Get Test info.
+   *
+   * @return array
+   *   Properties that are displayed in the test selection form.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Fingerprint Tests.',
+      'description' => 'Tests for fingerprint ingtegration.',
+      'group' => 'Islandora Chemistry',
+    );
+  }
+
+  /**
+   * A smoke test for fingerprint integration.
+   */
+  public function testFingerprint() {
+    module_load_include('inc', 'islandora_chemistry', 'includes/fingerprint');
+    $mol_file_path = drupal_realpath(
+      drupal_get_path('module', 'islandora_chemistry') . '/tests/fixtures/chemicals/example.mol'
+    );
+    islandora_chemistry_fingerprint($this->inchikey, $mol_file_path);
+    $this->assertTrue(
+      islandora_chemistry_get_compound($this->inchikey),
+      t('A fingerprint was added to and retrieved from the table.')
+    );
+  }
+}

@@ -30,9 +30,10 @@ function islandora_chemistry_set_compound($columns) {
  *   FALSE if there are is no existing entry for that InChIKey.
  */
 function islandora_chemistry_get_compound($inchikey) {
-  return db_select('islandora_chemistry_fingerprint')
-    ->fields('islandora_chemistry_fingerprint')
-    ->execute('inchikey'=> $inchikey)
+  return db_select('islandora_chemistry_fingerprints')
+    ->fields('islandora_chemistry_fingerprints')
+    ->condition('inchikey', $inchikey)
+    ->execute()
     ->fetchAssoc();
 }
 
@@ -44,7 +45,7 @@ function islandora_chemistry_get_compound($inchikey) {
  *
  * @return mixed
  *   Fingerprint's return code of not 0.
- *   The fingerprint if successful.
+ *   The fingerprint as an array of fingerprint_$i => int if successful.
  */
 function islandora_chemistry_run_fingerprint($mol_file_path) {
   $fingerprint_path = drupal_realpath(
@@ -59,7 +60,7 @@ function islandora_chemistry_run_fingerprint($mol_file_path) {
   );
   $fingerprint_pipes = array();
   $fingerprint_environment = array(
-    'PYTHONPATH' => libraries_get_path('indigo-python'),
+    'PYTHONPATH' => drupal_realpath(libraries_get_path('indigo-python')),
   );
 
   $fingerprint_process = proc_open(
@@ -69,20 +70,28 @@ function islandora_chemistry_run_fingerprint($mol_file_path) {
     NULL,
     $fingerprint_environment
   );
-  $fingerprint_exit_code = $proc_close($fingerprint_process);
+
+  fclose($fingerprint_pipes[0]);
+  $fingerprint_process_output = stream_get_contents($fingerprint_pipes[1]);
+  fclose($fingerprint_pipes[1]);
+  fclose($fingerprint_pipes[2]);
+  $fingerprint_exit_code = proc_close($fingerprint_process);
 
   if ($fingerprint_exit_code) {
     return FALSE;
   }
   else {
-    $fingerprint = explode(
+    $numerical_fingerprint_array = explode(
       ', ',
       str_replace(
         array('[', ']', 'L'),
         array('', '', ''),
-        $fingerprint_pipes[1]
+        $fingerprint_process_output
       )
     );
+    foreach ($numerical_fingerprint_array as $index => $part) {
+      $fingerprint["fingerprint_$index"] = $part;
+    }
     return $fingerprint;
   }
 }
@@ -110,7 +119,9 @@ function islandora_chemistry_fingerprint($inchikey, $mol_file_path) {
     }
   }
 
-  unset($fingerprint['id']);
+  if (isset($fingerprint['id'])) {
+    unset($fingerprint['id']);
+  }
   unset($fingerprint['inchikey']);
   return $fingerprint;
 }

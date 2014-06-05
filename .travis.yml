@@ -2,9 +2,10 @@ language: php
 php:
   - 5.3.3
   - 5.4
+  - 5.5
 branches:
   only:
-    - 7.x
+    - /^7.x/
 env:
   - FEDORA_VERSION="3.5"
   - FEDORA_VERSION="3.6.2"
@@ -25,3 +26,7 @@ script:
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/islandora_solution_pack_chemistry
   - drush coder-review --reviews=production,security,style,i18n,potx,sniffer islandora_chemistry
   - phpcpd --names *.module,*.inc,*.test sites/all/modules/islandora_solution_pack_chemistry
+  - phpunit -c tests/travis.xml sites/all/modules/islandora_chemistry/tests/openbabel.test.php
+  - drush test-run --uri=http://localhost:8081 "Islandora Chemistry Solution Pack"
+after_failure:
+  - $ISLANDORA_DIR/tests/scripts/travis_after_failure.sh
