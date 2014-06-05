@@ -22,7 +22,7 @@ function islandora_chemistry_set_compound($columns) {
 /**
  * Get a fingerprint, or verify it is set.
  *
- * @param array $inchikey
+ * @param string $inchikey
  *   The InChIKey to get the fingerprint for.
  *
  * @return mixed
@@ -40,7 +40,7 @@ function islandora_chemistry_get_compound($inchikey) {
  * Run fingerprint generation.
  *
  * @param string $mol_file_path
- *   The path to the mol file to fingerprint.
+ *   The path to the .mol file to fingerprint.
  *
  * @return mixed
  *   Fingerprint's return code of not 0.
@@ -89,6 +89,12 @@ function islandora_chemistry_run_fingerprint($mol_file_path) {
 
 /**
  * Gets or sets a fingerprint if necessary.
+ *
+ * @param string $inchikey
+ *   The InChIKey to get the fingerprint for.
+ *
+ * @param string $mol_file_path
+ *   The path to the .mol file to fingerprint.
  */
 function islandora_chemistry_fingerprint($inchikey, $mol_file_path) {
   $fingerprint = islandora_chemistry_get_compound($inchikey);

@@ -1,0 +1,14 @@
+ object 1 class array type float rank 0 items  40 ASCII
+ data file channel_5.pos
+ 
+ object 2 class gridconnections counts 1 1
+ 
+ object 3 class array type float rank 0 items  40 ASCII
+ data file channel_5.dat
+ attribute "dep" string "positions"
+ 
+ object "irreg positions regular connections" class field
+ component "positions" value 1
+ component "connections" value 2
+ component "data" value 3
+ end
