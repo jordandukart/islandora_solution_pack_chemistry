@@ -28,6 +28,8 @@ class Checkmol {
    */
   const HASHES = '####';
 
+  protected $timeout = NULL;
+
   /**
    * Constructor.
    *
@@ -35,9 +37,27 @@ class Checkmol {
    *   The address to which to connect. Defaults to 'localhost'.
    * @param int $port
    *   The port to which to connect on the given host. Defaults to 55624.
+   * @param float $timeout
+   *   An amount of time in seconds for which to attempt to connect. We use
+   *   PHP's "default_socket_timeout" for a default.
    */
-  public function __construct($host = 'localhost', $port = 55624) {
-    $this->socket = fsockopen($host, $port);
+  public function __construct($host = 'localhost', $port = 55624, $timeout = NULL) {
+    $this->timeout = $timeout;
+    if ($this->timeout !== NULL) {
+      $error = $error_string = '';
+      $this->socket = fsockopen($host, $port, $error, $error_string, $this->timeout);
+    }
+    else {
+      $this->socket = fsockopen($host, $port);
+    }
+
+    if ($this->socket === FALSE) {
+      throw new IOException('Failed to connect.');
+    }
+    elseif ($this->timeout !== NULL) {
+      $this->send(static::HASHES);
+      stream_set_timeout($this->socket, $this->timeout);
+    }
   }
 
   /**
@@ -46,8 +66,10 @@ class Checkmol {
    * Attempt to disconnect gracefully.
    */
   public function __destruct() {
-    $this->send(static::HASHES . " BYE\n");
-    fclose($this->socket);
+    if ($this->socket !== FALSE) {
+      $this->send(static::HASHES . ' BYE');
+      fclose($this->socket);
+    }
   }
 
   /**
@@ -56,7 +78,16 @@ class Checkmol {
   public function ready() {
     // Assume that if the first for bytes are '####', the socket is ready to
     // go.
-    if (!$this->ready) {
+    if (!$this->ready && $this->socket) {
+      if ($this->timeout !== NULL) {
+        $read = array($this->socket);
+        $write = array();
+        $except = array();
+        $count = stream_select($read, $write, $except, $this->timeout);
+        if (empty($read) || $count === 0) {
+          return FALSE;
+        }
+      }
       $buffer = fgets($this->socket);
       $this->ready = strpos($buffer, static::HASHES) === 0;
     }
@@ -84,10 +115,12 @@ class Checkmol {
    *   The message to send over the connection.
    */
   protected function sendRaw($message) {
-    while (!$this->ready()) {
-      sleep(1);
+    if ($this->ready()) {
+      fwrite($this->socket, $message);
     }
-    fwrite($this->socket, $message);
+    else {
+      throw new IOException('Not ready to send...');
+    }
   }
 
   /**
@@ -97,10 +130,12 @@ class Checkmol {
    *   A line read from the connection (ending in a newline).
    */
   protected function readline() {
-    while (!$this->ready()) {
-      sleep(1);
+    if ($this->ready()) {
+      return fgets($this->socket);
     }
-    return fgets($this->socket);
+    else {
+      throw new IOException('Not ready to recieve...');
+    }
   }
 
   /**
@@ -182,4 +217,7 @@ class Checkmol {
 }
 
 class UnexpectedOutputException extends Exception {
+}
+
+class IOException extends Exception {
 }

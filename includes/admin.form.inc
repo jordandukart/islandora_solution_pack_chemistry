@@ -25,6 +25,8 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
   };
   $python = $get_default_value('islandora_chemistry_python', 'python');
   $obabel = $get_default_value('islandora_chemistry_openbabel', 'obabel');
+  $cmmmsrv_host = $get_default_value('islandora_chemistry_cmmmsrv_host', 'localhost');
+  $cmmmsrv_port = $get_default_value('islandora_chemistry_cmmmsrv_port', 55624);
   $form += array(
     'islandora_chemistry_openbabel' => array(
       '#prefix' => '<div id="obabel-wrapper">',
@@ -56,6 +58,43 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
         'event' => 'change',
       ),
     ),
+    'islandora_chemistry_cmmmsrv' => array(
+      '#type' => 'fieldset',
+      '#title' => t('Checkmol/Matchmol Server Information'),
+      '#description' => (@islandora_chemistry_admin_cmmmsrv_available($cmmmsrv_host, $cmmmsrv_port, 5) ?
+        t('!imgThe server is available.', array(
+          '!img' => theme_image(array('path' => 'misc/watchdog-ok.png', 'attributes' => array())),
+        )) :
+        t('!imgCould not connect to the given server.', array(
+          '!img' => theme_image(array('path' => 'misc/watchdog-error.png', 'attributes' => array())),
+        ))),
+      '#prefix' => '<div id="cmmmsrv-wrapper">',
+      '#suffix' => '</div>',
+      'islandora_chemistry_cmmmsrv_host' => array(
+        '#type' => 'textfield',
+        '#title' => t('Checkmol/Matchmol Server Host'),
+        '#description' => t('Hostname/IP address corresponding to where the cmmmsrv daemon is available.'),
+        '#default_value' => $cmmmsrv_host,
+        '#ajax' => array(
+          'callback' => 'islandora_chemistry_admin_settings_form_cmmmsrv_ajax_callback',
+          'wrapper' => 'cmmmsrv-wrapper',
+          'effect' => 'fade',
+          'event' => 'change',
+        ),
+      ),
+      'islandora_chemistry_cmmmsrv_port' => array(
+        '#type' => 'textfield',
+        '#title' => t('Checkmol/Matchmol Server Port'),
+        '#description' => t('TCP port on the given hostname/IP address corresponding to where the cmmmsrv daemon is available.'),
+        '#default_value' => $cmmmsrv_port,
+        '#ajax' => array(
+          'callback' => 'islandora_chemistry_admin_settings_form_cmmmsrv_ajax_callback',
+          'wrapper' => 'cmmmsrv-wrapper',
+          'effect' => 'fade',
+          'event' => 'change',
+        ),
+      ),
+    ),
   );
 
   return system_settings_form($form);
@@ -74,4 +113,43 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
  */
 function islandora_chemistry_admin_settings_form_ajax_callback(array $form, array $form_state) {
   return drupal_array_get_nested_value($form, $form_state['triggering_element']['#parents']);
+}
+
+/**
+ * Ajax callback for the cmmmsrv textfields.
+ *
+ * @param array $form
+ *   The Drupal form definition.
+ * @param array $form_state
+ *   The Drupal form state.
+ *
+ * @return array
+ *   The element to render as part the ajax callback.
+ */
+function islandora_chemistry_admin_settings_form_cmmmsrv_ajax_callback(array $form, array $form_state) {
+  return drupal_array_get_nested_value($form, array('islandora_chemistry_cmmmsrv'));
+}
+
+/**
+ * Probe a hostname/port pair, to see if it correspond to a cmmmsrv daemon.
+ *
+ * @param string $host
+ *   Address of the host to test.
+ * @param int $port
+ *   TCP port to test.
+ *
+ * @return bool
+ *   TRUE if it appeared that we could connect, and it responded in a manner
+ *   similar to that of a cmmmsrv daemon in a timely fashion (~5 seconds);
+ *   otherwise, FALSE.
+ */
+function islandora_chemistry_admin_cmmmsrv_available($host, $port) {
+  module_load_include('inc', 'islandora_chemistry', 'includes/commands/checkmol');
+  try {
+    $cm = new \Islandora\Chemistry\Checkmol($host, $port, 5);
+    return $cm->ready();
+  }
+  catch (\Islandora\Chemistry\IOException $e) {
+    return FALSE;
+  }
 }

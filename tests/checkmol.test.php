@@ -7,7 +7,7 @@
  * We assume that cmmmsrv is available on localhost at 55624.
  */
 
-require_once __DIR__ . '/../includes/checkmol.inc';
+require_once __DIR__ . '/../includes/commands/checkmol.inc';
 require_once __DIR__ . '/chem.test.inc';
 
 class CheckmolTest extends IslandoraChemistryUnitTest {
