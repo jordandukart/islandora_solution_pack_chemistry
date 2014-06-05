@@ -8,36 +8,47 @@
  */
 
 require_once __DIR__ . '/../includes/checkmol.inc';
+require_once __DIR__ . '/chem.test.inc';
 
-class OpenBabelTest extends PHPUnit_Framework_TestCase {
+class CheckmolTest extends IslandoraChemistryUnitTest {
   /**
-   * Inherits.
+   * Helper to provide mol files based on transforming the fixtures.
    */
-  public function setUp() {
-    $this->tmps = array();
-  }
+  public function getMolFiles() {
+    require_once __DIR__ . '/../includes/commands/openbabel.inc';
+    $mol_files = array();
 
-  /**
-   * Inherits.
-   */
-  public function tearDown() {
-    foreach ($this->tmps as $tmp) {
-      @unlink($tmp);
+    foreach ($this->getSamples() as $fixture) {
+      $temp_file = $this->tmp();
+      $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+        'o' => 'mol',
+        'O' => $temp_file,
+      ));
+
+      $result = \Islandora\Chemistry\OpenBabel\execute(
+        $fixture,
+        $options,
+        '/usr/bin/obabel'
+      );
+      $mol_files[] = array($temp_file);
     }
+    return $mol_files;
   }
 
   /**
-   * Temp file helper.
+   * Test generation of fragment codes.
+   *
+   * @dataProvider getMolFiles
    */
-  protected function tmp() {
-    $this->tmps[] = $tmp = tempnam(sys_get_temp_dir(), 'chem_test');
-    unlink($tmp);
-    return $tmp;
-  }
-
-  public function testCheckmol8DigitCode() {
+  public function testCheckmol8DigitCode($mol_file) {
     $cm = new \Islandora\Chemistry\Checkmol();
-    $output = $cm->get8DigitCodes(__DIR__ . '/fixtures/chemicals/example.mol');
-    print_r($output);
+    try {
+      $output = $cm->get8DigitCodes($mol_file);
+      foreach ($output as $code) {
+        $this->assertEquals(8, strlen($code), "Code is of the proper length for $mol_file.");
+      }
+    }
+    catch (Exception $e) {
+    }
   }
 }
