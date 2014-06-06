@@ -23,8 +23,8 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
   $get_default_value = function($name, $default) use(&$form_state) {
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : variable_get($name, $default);
   };
-  $python = $get_default_value('islandora_chemistry_python', 'python');
-  $obabel = $get_default_value('islandora_chemistry_openbabel', 'obabel');
+  $python = $get_default_value('islandora_chemistry_python', '/usr/bin/python');
+  $obabel = $get_default_value('islandora_chemistry_openbabel', '/usr/bin/obabel');
   $cmmmsrv_host = $get_default_value('islandora_chemistry_cmmmsrv_host', 'localhost');
   $cmmmsrv_port = $get_default_value('islandora_chemistry_cmmmsrv_port', 55624);
   $form += array(
