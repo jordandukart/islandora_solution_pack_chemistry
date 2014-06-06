@@ -89,6 +89,7 @@ function islandora_chemistry_run_fingerprint($mol_file_path) {
         $fingerprint_process_output
       )
     );
+    $fingerprint = array();
     foreach ($numerical_fingerprint_array as $index => $part) {
       $fingerprint["fingerprint_$index"] = $part;
     }
