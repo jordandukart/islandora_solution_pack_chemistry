@@ -32,13 +32,23 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
     $this->deleteObjectsOnTearDown = FALSE;
   }
 
+  /**
+   * Runs the actual ingest test for a single chemical file.
+   *
+   * @param string $file
+   *   The name of the file to check.
+   * @param bool $derivatives
+   *   Whether or not this file should create derivatives.
+   */
   protected function chemicalTestHelper($file, $derivatives = TRUE) {
+    // Don't proceed if we don't know what file type this is.
     $mimetype = $this->getFileTypeSelect($file);
     if (!$mimetype) {
       $this->fail("File $file is unlisted with known chemical mimetypes.");
       return;
     }
 
+    // First, run an ingest test without setting the mimetype.
     $path = drupal_get_path('module', 'islandora_chemistry') . "/tests/fixtures/chemicals/$file";
     $edit = array('files[file]' => $path);
     $this->drupalPost("islandora/object/{$this->testCollectionPID}/manage/overview/ingest", $edit, 'Ingest');
@@ -46,6 +56,7 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
     $this->assertChemicalDerivatives($object, $derivatives);
     $this->assertTrue($object['OBJ']->mimetype == $mimetype, "Ingested object mimetype {$object['OBJ']->mimetype} matches expected of $mimetype.");
 
+    // Then, run an ingest test with the mimetype selected.
     $edit['type_select_check'] = TRUE;
     $edit['type_selector'] = $this->getFileTypeSelect($file);
     $this->drupalPost("islandora/object/{$this->testCollectionPID}/manage/overview/ingest", $edit, 'Ingest');
@@ -54,7 +65,16 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
     $this->assertTrue($object['OBJ']->mimetype == $mimetype, "Ingested object mimetype {$object['OBJ']->mimetype} matches expected of $mimetype.");
   }
 
+  /**
+   * Asserts that a chemical object contains expected, valid datastreams.
+   *
+   * @param AbstractObject $object
+   *   The object to check.
+   * @param bool $derivatives
+   *   Whether this object should have generated derivatives.
+   */
   protected function assertChemicalDerivatives($object, $derivatives) {
+    // Assert that appropriate datastreams were created.
     $datastreams = array('OBJ');
     if ($derivatives) {
       array_merge($datastreams, array(
@@ -64,6 +84,8 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
       ));
     }
     $this->assertDatastreams($object, $datastreams);
+
+    // Assert that datastreams we can validate are valid.
     if ($derivatives) {
       module_load_include('inc', 'islandora_chemistry', 'tests/mol_datastream_validator');
       $datastreams = array(
@@ -75,14 +97,32 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
     }
   }
 
+  /**
+   * Callback to determine if a file starts with 'example.'.
+   *
+   * @param string $name
+   *   The name of the file.
+   *
+   * @return bool
+   *   Whether or not the name represents an example file.
+   */
   protected function isExampleFile($name) {
     return strpos($name, 'example.') !== FALSE;
   }
 
+  /**
+   * Tests each 'example.*' file in the fixtures/chemicals folder.
+   */
   public function testChemicals() {
+    // Make a test collection to put these all in.
     $this->testCollectionPID = "islandora:" . $this->randomName();
     $this->createTestCollection($this->randomName(), 'islandora:sp_chem_CM', $this->testCollectionPID);
+
+    // Grab an array containing the names of the files.
     $files = array_filter(scandir(__DIR__ . '/fixtures/chemicals'), array($this, 'isExampleFile'));
+
+    // These files aren't expected to create derivatives, so we split the files
+    // array in two based on this list.
     $no_derivatives = array(
       'example.inp',
       'example.c3d',
@@ -93,18 +133,28 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
     );
     $makes_derivatives = array_diff($files, $no_derivatives);
     $makes_no_derivatives = array_intersect($files, $no_derivatives);
+
+    // Test the files that we expect to contain derivatives.
     foreach ($makes_derivatives as $file) {
       $this->chemicalTestHelper($file);
     }
+    // Test the files that we expect not to make derivatives.
     foreach ($makes_no_derivatives as $file) {
       $this->chemicalTestHelper($file, FALSE);
     }
   }
 
   /**
-   * @param $name
+   * Returns the expected mimetype of a file.
    *
-   * @return bool
+   * Conveniently, this also matches the value of the select option to be used
+   * when manually designating the file type during ingest.
+   *
+   * @param string $name
+   *   The name of the file.
+   *
+   * @return string|bool
+   *   The file's expected mimetype, or FALSE on fail.
    */
   protected function getFileTypeSelect($name) {
     $list = array(
