@@ -790,7 +790,9 @@ class Options implements ArrayAccess {
  * Calls the OpenBabel CLI with the stored options.
  *
  * @param string $file
- *   A filename to be transformed.
+ *   A filename to be transformed. This will override any value added to the
+ *   Options object. Specify something evaluating to boolean FALSE to skip this
+ *   parameter.
  * @param Options $options
  *   The options to pass to the OpenBabel CLI.
  * @param string $executable_path
@@ -801,7 +803,9 @@ class Options implements ArrayAccess {
  *   The output of the command executed.
  */
 function execute($file, Options $options, $executable_path = NULL) {
-  $options->setInputFile($file);
+  if ($file) {
+    $options->setInputFile($file);
+  }
   if ($executable_path === NULL) {
     $executable_path = variable_get('islandora_chemistry_openbabel', 'obabel');
   }
