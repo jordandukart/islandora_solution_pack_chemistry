@@ -207,3 +207,30 @@ function islandora_chemistry_islandora_sp_chem_cm_islandora_derivative() {
 
   return $derivatives;
 }
+
+/**
+ * Implements hook_file_mimetype_mapping_alter().
+ *
+ * Override mapping for chemical MIME-types, as some are mapped incorrectly,
+ * such as ".gam" being mapped to "chemical/x-gamess-input", while its proper
+ * mapping would be "chemical/x-gamess-output".
+ */
+function islandora_chemistry_file_mimetype_mapping_alter(&$mapping) {
+  $chem_filter = function ($mimetype) {
+    return strpos($mimetype, 'chemical/') === 0;
+  };
+
+  $mime_detect = new MimeDetect();
+  $types = $mime_detect->getMimeTypes();
+  $filtered_types = array_filter($types, $chem_filter);
+
+  $intersect = array_intersect_key($types, $mapping['extensions']);
+  foreach ($intersect as $ext => $mime) {
+    $keys = array_keys($mapping['mimetypes'], $mime);
+    if (empty($keys)) {
+      $mapping['mimetypes'][] = $mime;
+      $keys = array_keys($mapping['mimetypes'], $mime);
+    }
+    $mapping['extensions'][$ext] = reset($keys);
+  }
+}
