@@ -29,7 +29,6 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
     variable_set('imagemagick_convert', $this->imagemagick_convert);
     $user = $this->drupalCreateUser(array_keys(module_invoke_all('permission')));
     $this->drupalLogin($user);
-    $this->deleteObjectsOnTearDown = FALSE;
   }
 
   /**
