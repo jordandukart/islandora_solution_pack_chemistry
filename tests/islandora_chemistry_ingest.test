@@ -1,0 +1,135 @@
+<?php
+/**
+ * @file
+ * Functional ingest tests for the UI.
+ */
+
+class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
+
+  protected $testCollectionPID;
+
+  /**
+   * Gets test info.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Chemical Ingest Tests',
+      'description' => 'Tests the ingest of supported chemical types and checks the results.',
+      'group' => 'Islandora Chemistry',
+    );
+  }
+
+  /**
+   * Sets up the test.
+   */
+  public function setUp() {
+    $this->imagemagick_convert = variable_get('imagemagick_convert', '/usr/bin/convert');
+    parent::setUp('islandora_chemistry', 'islandora_basic_collection', 'imagemagick');
+    variable_set('image_toolkit', 'imagemagick');
+    variable_set('imagemagick_convert', $this->imagemagick_convert);
+    $user = $this->drupalCreateUser(array_keys(module_invoke_all('permission')));
+    $this->drupalLogin($user);
+    $this->deleteObjectsOnTearDown = FALSE;
+  }
+
+  protected function chemicalTestHelper($file, $derivatives = TRUE) {
+    $mimetype = $this->getFileTypeSelect($file);
+    if (!$mimetype) {
+      $this->fail("File $file is unlisted with known chemical mimetypes.");
+      return;
+    }
+
+    $path = drupal_get_path('module', 'islandora_chemistry') . "/tests/fixtures/chemicals/$file";
+    $edit = array('files[file]' => $path);
+    $this->drupalPost("islandora/object/{$this->testCollectionPID}/manage/overview/ingest", $edit, 'Ingest');
+    $object = $this->getObjectFromPath($this->url);
+    $this->assertChemicalDerivatives($object, $derivatives);
+    $this->assertTrue($object['OBJ']->mimetype == $mimetype, "Ingested object mimetype {$object['OBJ']->mimetype} matches expected of $mimetype.");
+
+    $edit['type_select_check'] = TRUE;
+    $edit['type_selector'] = $this->getFileTypeSelect($file);
+    $this->drupalPost("islandora/object/{$this->testCollectionPID}/manage/overview/ingest", $edit, 'Ingest');
+    $object = $this->getObjectFromPath($this->url);
+    $this->assertChemicalDerivatives($object, $derivatives);
+    $this->assertTrue($object['OBJ']->mimetype == $mimetype, "Ingested object mimetype {$object['OBJ']->mimetype} matches expected of $mimetype.");
+  }
+
+  protected function assertChemicalDerivatives($object, $derivatives) {
+    $datastreams = array('OBJ');
+    if ($derivatives) {
+      array_merge($datastreams, array(
+        'TN',
+        'MEDIUM',
+        'MOL',
+      ));
+    }
+    $this->assertDatastreams($object, $datastreams);
+    if ($derivatives) {
+      module_load_include('inc', 'islandora_chemistry', 'tests/mol_datastream_validator');
+      $datastreams = array(
+        array('TN', 'Image'),
+        array('MEDIUM', 'Image'),
+        array('MOL', 'MOL'),
+      );
+      $this->validateDatastreams($object, $datastreams);
+    }
+  }
+
+  protected function isExampleFile($name) {
+    return strpos($name, 'example.') !== FALSE;
+  }
+
+  public function testChemicals() {
+    $this->testCollectionPID = "islandora:" . $this->randomName();
+    $this->createTestCollection($this->randomName(), 'islandora:sp_chem_CM', $this->testCollectionPID);
+    $files = array_filter(scandir(__DIR__ . '/fixtures/chemicals'), array($this, 'isExampleFile'));
+    $no_derivatives = array(
+      'example.inp',
+      'example.c3d',
+      'example.chm',
+      'example.dx',
+      'example.gau',
+      'example.jdx',
+    );
+    $makes_derivatives = array_diff($files, $no_derivatives);
+    $makes_no_derivatives = array_intersect($files, $no_derivatives);
+    foreach ($makes_derivatives as $file) {
+      $this->chemicalTestHelper($file);
+    }
+    foreach ($makes_no_derivatives as $file) {
+      $this->chemicalTestHelper($file, FALSE);
+    }
+  }
+
+  /**
+   * @param $name
+   *
+   * @return bool
+   */
+  protected function getFileTypeSelect($name) {
+    $list = array(
+      'example.c3d' => 'chemical/x-chem3d',
+      'example.cdx' => 'chemical/x-cdx',
+      'example.chm' => 'chemical/x-chemdraw',
+      'example.cif' => 'chemical/x-cif',
+      'example.cml' => 'chemical/x-cml',
+      'example.cub' => 'chemical/x-gaussian-cube',
+      'example.dx' => 'chemical/x-jcamp-dx',
+      'example.gal' => 'chemical/x-gaussian-log',
+      'example.gam' => 'chemical/x-gamess-output',
+      'example.gau' => 'chemical/x-gaussian-input',
+      'example.inp' => 'chemical/x-gamess-input',
+      'example.jdx' => 'chemical/x-jcamp-dx',
+      'example.mol' => 'chemical/x-mdl-molfile',
+      'example.mop' => 'chemical/x-mopac-input',
+      'example.pdb' => 'chemical/x-pdb',
+      'example.xyz' => 'chemical/x-xyz',
+    );
+    if (isset($list[$name])) {
+      return $list[$name];
+    }
+    return FALSE;
+  }
+
+}
+
