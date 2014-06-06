@@ -807,7 +807,7 @@ function execute($file, Options $options, $executable_path = NULL) {
     $options->setInputFile($file);
   }
   if ($executable_path === NULL) {
-    $executable_path = variable_get('islandora_chemistry_openbabel', 'obabel');
+    $executable_path = variable_get('islandora_chemistry_openbabel', '/usr/bin/obabel');
   }
 
   if (is_executable($executable_path)) {
