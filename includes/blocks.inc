@@ -125,3 +125,52 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
     $tuque->repository->ingestObject($object);
   }
 }
+
+/**
+ * Defines the structure search block.
+ *
+ * @param array $form
+ *   An array representing a Drupal form.
+ * @param array $form_state
+ *   An array containing the Drupal form state.
+ *
+ * @return array
+ *   A renderable array of a Drupal form.
+ */
+function islandora_chemistry_structure_search_form($form, &$form_state) {
+  $chem_doodle_path = libraries_get_path('ChemDoodleWeb');
+  $chem_path = drupal_get_path('module', 'islandora_chemistry');
+  $element_id = drupal_html_id('islandora_chemistry_sketcher_canvas');
+  $form['sketcher_canvas'] = array(
+    '#type' => 'markup',
+    '#attached' => array(
+      'js' => array(
+        array(
+          'type' => 'setting',
+          'data' => array(
+            'islandora_chemistry_sketcher_canvas' => array(
+              'element_id' => $element_id,
+              'element_selector' => "#$element_id",
+              'width' => 500,
+              'height' => 500,
+            ),
+          ),
+        ),
+        "$chem_path/js/detectmobilebrowser.js",
+        "$chem_doodle_path/install/ChemDoodleWeb.js",
+        "$chem_doodle_path/install/uis/ChemDoodleWeb-uis.js",
+        "$chem_path/js/sketchercanvas.js",
+      ),
+      'css' => array(
+        "$chem_doodle_path/install/ChemDoodleWeb.css",
+        "$chem_doodle_path/install/uis/jquery-ui-1.10.3.custom.css",
+      ),
+    ),
+    '#markup' => "<canvas id='$element_id'></canvas>",
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Search'),
+  );
+  return $form;
+}

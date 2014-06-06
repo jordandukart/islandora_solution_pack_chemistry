@@ -122,6 +122,10 @@ function islandora_chemistry_block_info() {
       'info' => t('Islandora Chemistry Upload A File'),
       'cache' => DRUPAL_NO_CACHE,
     ),
+    'structure_search' => array(
+      'info' => t('Islandora Chemistry Structure Search'),
+      'cache' => DRUPAL_NO_CACHE,
+    ),
   );
 }
 
@@ -136,6 +140,15 @@ function islandora_chemistry_block_view($delta = '') {
         module_load_include('inc', 'islandora_chemistry', 'includes/blocks');
         $block['subject'] = t('Upload Structures');
         $block['content'] = drupal_get_form('islandora_chemistry_upload_file_form');
+      }
+      break;
+
+    case 'structure_search':
+      if (user_access('search islandora solr')) {
+        module_load_include('inc', 'islandora_chemistry', 'includes/blocks');
+        $block['subject'] = t('Structure Search');
+        $block['content'] = drupal_get_form('islandora_chemistry_structure_search_form');
+        dsm($block, 'block');
       }
       break;
   }
