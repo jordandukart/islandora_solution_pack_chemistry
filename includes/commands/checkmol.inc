@@ -164,7 +164,7 @@ class Checkmol {
       if ($line !== FALSE) {
         $output[] = $line;
       }
-      $found_final_hashes = end($output) == static::HASHES . "\n";
+      $found_final_hashes = (end($output) == (static::HASHES . "\n"));
       sleep(1);
     }
 
