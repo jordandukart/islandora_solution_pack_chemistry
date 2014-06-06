@@ -173,9 +173,17 @@ class Checkmol {
 
   /**
    * Convenience method; run a command against the given molecule structure.
+   *
+   * @param string $command
+   *   As string indicating the command to run, as accepted by runCommand().
+   * @param string $mol
+   *   A string containing either the filename of a MOL file, or the structure
+   *   one might contain.
    */
-  public function runCommandWithFile($command, $mol_file) {
-    return $this->runCommand($command, file_get_contents($mol_file));
+  public function runCommandOnFileOrStructure($command, $mol) {
+    return file_exists($mol) ?
+      $this->runCommand($command, file_get_contents($mol)) :
+      $this->runCommand($command, $mol);
   }
 
   /**
@@ -183,8 +191,9 @@ class Checkmol {
    *
    * @see http://merian.pch.univie.ac.at/~nhaider/cheminf/fgtable.pdf
    *
-   * @param string $mol_file
-   *   A string containing the filename of a MOL file.
+   * @param string $mol
+   *   A string containing either the filename of a MOL file, or the structure
+   *   one might contain.
    *
    * @return array
    *   A (potentially empty) array of all fragments contained in the given
@@ -197,12 +206,12 @@ class Checkmol {
    *   Thrown if the given molecule file was reported as being invalid by
    *   the checkmol command.
    */
-  public function get8DigitCodes($mol_file) {
+  public function get8DigitCodes($mol) {
     $semi_trim = function ($str) {
       return rtrim($str, ';');
     };
 
-    $command_output = $this->runCommandWithFile('checkmol:c', $mol_file);
+    $command_output = $this->runCommandOnFileOrStructure('checkmol:c', $mol);
     $filtered_output = array_filter(array_map($semi_trim, $command_output));
     if (count($filtered_output) > 1) {
       // Too many lines.
@@ -210,7 +219,7 @@ class Checkmol {
     }
     $output = reset($filtered_output);
     if ($output == static::HASHES . ' invalid molecule') {
-      throw new InvalidArgumentException("Bad molecule file input: $mol_file");
+      throw new InvalidArgumentException("Bad molecule input: $mol");
     }
     return explode(';', $output);
   }

@@ -40,10 +40,27 @@ class CheckmolTest extends IslandoraChemistryUnitTest {
    *
    * @dataProvider getMolFiles
    */
-  public function testCheckmol8DigitCode($mol_file) {
+  public function testCheckmol8DigitCodeFile($mol_file) {
     $cm = new \Islandora\Chemistry\Checkmol();
     try {
       $output = $cm->get8DigitCodes($mol_file);
+      foreach ($output as $code) {
+        $this->assertEquals(8, strlen($code), "Code is of the proper length for $mol_file.");
+      }
+    }
+    catch (Exception $e) {
+    }
+  }
+
+  /**
+   * Test generation of fragment codes.
+   *
+   * @dataProvider getMolFiles
+   */
+  public function testCheckmol8DigitCodeString($mol_file) {
+    $cm = new \Islandora\Chemistry\Checkmol();
+    try {
+      $output = $cm->get8DigitCodes(file_get_contents($mol_file));
       foreach ($output as $code) {
         $this->assertEquals(8, strlen($code), "Code is of the proper length for $mol_file.");
       }
