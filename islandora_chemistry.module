@@ -148,7 +148,6 @@ function islandora_chemistry_block_view($delta = '') {
         module_load_include('inc', 'islandora_chemistry', 'includes/blocks');
         $block['subject'] = t('Structure Search');
         $block['content'] = drupal_get_form('islandora_chemistry_structure_search_form');
-        dsm($block, 'block');
       }
       break;
   }

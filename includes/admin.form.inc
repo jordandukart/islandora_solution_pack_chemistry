@@ -27,6 +27,8 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
   $obabel = $get_default_value('islandora_chemistry_openbabel', '/usr/bin/obabel');
   $cmmmsrv_host = $get_default_value('islandora_chemistry_cmmmsrv_host', 'localhost');
   $cmmmsrv_port = $get_default_value('islandora_chemistry_cmmmsrv_port', 55624);
+  $inchi_field = $get_default_value('islandora_chemistry_inchikey_solr_field', 'cml_inchi_key');
+  $fragment_field = $get_default_value('islandora_chemistry_fragment_solr_field', 'cml_fragment');
   $form += array(
     'islandora_chemistry_openbabel' => array(
       '#prefix' => '<div id="obabel-wrapper">',
@@ -93,6 +95,22 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
           'effect' => 'fade',
           'event' => 'change',
         ),
+      ),
+    ),
+    'islandora_chemistry_search' => array(
+      '#type' => 'fieldset',
+      '#title' => t('Solr Search Fields'),
+      '#collapsed' => TRUE,
+      '#collapsible' => FALSE,
+      'islandora_chemistry_inchikey_solr_field' => array(
+        '#type' => 'textfield',
+        '#title' => t('InChIKey Solr Field'),
+        '#default_value' => $inchi_field,
+      ),
+      'islandora_chemistry_fragment_solr_field' => array(
+        '#type' => 'textfield',
+        '#title' => t('Fragment Solr Field'),
+        '#default_value' => $fragment_field,
       ),
     ),
   );

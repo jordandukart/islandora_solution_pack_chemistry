@@ -221,9 +221,7 @@ class Checkmol {
     if ($output == static::HASHES . ' invalid molecule') {
       throw new InvalidArgumentException("Bad molecule input: $mol");
     }
-    return $output ?
-      explode(';', $output) :
-      array();
+    return explode(';', $output);
   }
 }
 
