@@ -152,8 +152,8 @@ function islandora_chemistry_derive_file_from_openbabel(AbstractObject $object, 
   $options = new Islandora\Chemistry\OpenBabel\Options(array(
     'O' => drupal_realpath($name),
   ) + $input_options);
+  $options->setInputFile(drupal_realpath($file->uri));
   $result = Islandora\Chemistry\OpenBabel\execute(
-    drupal_realpath($file->uri),
     $options
   );
   $output_file = islandora_temp_file_entry($name, $dest_mime);

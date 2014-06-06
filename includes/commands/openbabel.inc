@@ -404,6 +404,20 @@ class Options implements ArrayAccess {
   protected $options = array();
 
   /**
+   * The filename of a file to process.
+   *
+   * @var string $inputFile
+   */
+  protected $inputFile = NULL;
+
+  /**
+   * The filename of a file to process.
+   *
+   * @var string $inputString
+   */
+  protected $inputString = NULL;
+
+  /**
    * Defines default option definitions based on the options type.
    *
    * The option definitions can optionally overwrite these defaults.
@@ -728,13 +742,48 @@ class Options implements ArrayAccess {
    *   The representation of this object.
    */
   public function __toString() {
-    $output = '';
+    $output = $this->inputFile === NULL ?
+        '' :
+      $this->inputFile . ' ';
     foreach ($this->options as $option => $value) {
       $output .= static::serialize($option, $value) . ' ';
     }
     return trim($output);
   }
 
+  /**
+   * Set the input file.
+   *
+   * @param string $file
+   *   The filename on which to run. If not provided, will wipe any existing
+   *   value.
+   */
+  public function setInputFile($file = NULL) {
+    $this->inputFile = $file;
+  }
+
+  /**
+   * Set string for standard input to the command.
+   *
+   * Note: Callers will likely also have to specify the format of the input
+   * the "i" (input format) parameter.
+   *
+   * @param string $string
+   *   A string to pass to the command as standard input.
+   */
+  public function setStdIn($string = '') {
+    $this->inputString = $string;
+  }
+
+  /**
+   * Get the string which was set for standard input.
+   *
+   * @return string
+   *   The string which was set.
+   */
+  public function getStdIn() {
+    return $this->inputString;
+  }
 }
 
 /**
@@ -752,6 +801,7 @@ class Options implements ArrayAccess {
  *   The output of the command executed.
  */
 function execute($file, Options $options, $executable_path = NULL) {
+  $options->setInputFile($file);
   if ($executable_path === NULL) {
     $executable_path = variable_get('islandora_chemistry_openbabel', 'obabel');
   }
@@ -759,13 +809,14 @@ function execute($file, Options $options, $executable_path = NULL) {
   if (is_executable($executable_path)) {
     $ret = -1;
     $output = array();
-    $command = "$executable_path $file $options";
+    $command = "$executable_path $options";
     $desc_spec = array(
       0 => array('pipe', 'r'),
       1 => array('pipe', 'w'),
       2 => array('pipe', 'w'),
     );
     $proc = proc_open($command, $desc_spec, $pipes);
+    fwrite($pipes[0], $options->getStdIn());
     fclose($pipes[0]);
     fclose($pipes[2]);
     $output = stream_get_contents($pipes[1]);
