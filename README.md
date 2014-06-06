@@ -14,11 +14,10 @@ All bugs, feature requests and improvement suggestions are tracked at the [DuraS
 
 This module requires the following modules/libraries:
 
-* [Islandora](https://github.com/islandora/islandora) - islandora core functionality
-* [Tuque](https://github.com/islandora/tuque) - The wrapper Islandora uses to communicate with Fedora Commons
+* [Islandora](https://github.com/islandora/islandora) - Islandora core functionality.
 * [OpenBabel](http://openbabel.org) - Required for basic functionality to work. OpenBabel converts the chemical structure files into a common format, creates images from them and extracts useful chemical data.
 * [ChemDoodleWeb](http://web.chemdoodle.com/) - Is used as a viewer for the object and allows a 3D representation of the molecule to be displayed. It is also used as a molecule editor so that structures can be used for searching.
-* [Indigo python API](http://ggasoftware.com/opensource/indigo) - Is required, along with a couple of Python scripts, to create and search for molecular fingerprints. These allow for substructures to be searched and retrieved. Upon ingest the fingerprint of the molecule is stored and so this package has to be present at this point if you want to use substructure searching on all of the molecules. Indigo requires at least Python version 2.6.6 to run. If your OS doesn't have at least this version available from your package manager then you can download a standalone version of Python from [Activestate](https://www.activestate.com/activepython).
+* [Indigo Python API](http://ggasoftware.com/opensource/indigo) - Is required to be installed as a Drupal library as the directory `indigo-python` to create and search for molecular fingerprints.  Indigo requires at least Python version 2.6.6 to run.
 * [Checkmol](http://merian.pch.univie.ac.at/~nhaider/cheminf/cmmm.html) - Required to identify functional groups in the molecule and allow searching based on that.
 
 ## Installation
