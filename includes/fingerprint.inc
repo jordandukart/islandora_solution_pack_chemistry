@@ -40,15 +40,15 @@ function islandora_chemistry_get_compound($inchikey) {
 /**
  * Run fingerprint generation.
  *
- * @param string $mol_file_path
- *   The path to the .mol file to fingerprint.
+ * @param string $mol
+ *   The string representation of the molecule to fingerprint.
  *
  * @return mixed
  *   Fingerprint's return code of not 0.
  *   The fingerprint as an array of fingerprint_$i => int if successful.
  */
-function islandora_chemistry_run_fingerprint($mol_file_path) {
-  $mol_file_path = escapeshellarg($mol_file_path);
+function islandora_chemistry_run_fingerprint($mol) {
+  $escaped_mol = escapeshellarg($mol);
   $fingerprint_path = escapeshellarg(
     drupal_realpath(
       drupal_get_path('module', 'islandora_chemistry') . '/cli/fingerprint.py'
@@ -57,7 +57,7 @@ function islandora_chemistry_run_fingerprint($mol_file_path) {
   $python = escapeshellarg(
     variable_get('islandora_chemistry_python', '/usr/bin/python')
   );
-  $fingerprint_command = "$python $fingerprint_path $mol_file_path";
+  $fingerprint_command = "$python $fingerprint_path $escaped_mol";
   $fingerprint_descriptorspec = array(
     0 => array('pipe', 'r'),
     1 => array('pipe', 'w'),
@@ -108,14 +108,14 @@ function islandora_chemistry_run_fingerprint($mol_file_path) {
  * @param string $inchikey
  *   The InChIKey to get the fingerprint for.
  *
- * @param string $mol_file_path
- *   The path to the .mol file to fingerprint.
+ * @param string $mol
+ *   The string representation of the molecule to fingerprint.
  */
-function islandora_chemistry_fingerprint($inchikey, $mol_file_path) {
+function islandora_chemistry_fingerprint($inchikey, $mol) {
   $fingerprint = islandora_chemistry_get_compound($inchikey);
 
   if (!$fingerprint) {
-    $fingerprint = islandora_chemistry_run_fingerprint($mol_file_path);
+    $fingerprint = islandora_chemistry_run_fingerprint($mol);
     if ($fingerprint !== FALSE) {
       $fingerprint = $fingerprint + array('inchikey' => $inchikey);
       islandora_chemistry_set_compound($fingerprint);

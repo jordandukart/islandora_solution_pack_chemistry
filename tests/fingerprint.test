@@ -42,7 +42,8 @@ class FingerprintTests extends DrupalWebTestCase {
     $mol_file_path = drupal_realpath(
       drupal_get_path('module', 'islandora_chemistry') . '/tests/fixtures/chemicals/example.mol'
     );
-    islandora_chemistry_fingerprint($this->inchikey, $mol_file_path);
+    $mol = file_get_contents($mol_file_path);
+    islandora_chemistry_fingerprint($this->inchikey, $mol);
     $this->assertTrue(
       islandora_chemistry_get_compound($this->inchikey),
       t('A fingerprint was added to and retrieved from the table.')
