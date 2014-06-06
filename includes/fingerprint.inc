@@ -48,10 +48,15 @@ function islandora_chemistry_get_compound($inchikey) {
  *   The fingerprint as an array of fingerprint_$i => int if successful.
  */
 function islandora_chemistry_run_fingerprint($mol_file_path) {
-  $fingerprint_path = drupal_realpath(
-    drupal_get_path('module', 'islandora_chemistry') . '/cli/fingerprint.py'
+  $mol_file_path = escapeshellarg($mol_file_path);
+  $fingerprint_path = escapeshellarg(
+    drupal_realpath(
+      drupal_get_path('module', 'islandora_chemistry') . '/cli/fingerprint.py'
+    )
   );
-  $python = variable_get('islandora_chemistry_python', '/usr/bin/python');
+  $python = escapeshellarg(
+    variable_get('islandora_chemistry_python', '/usr/bin/python')
+  );
   $fingerprint_command = "$python $fingerprint_path $mol_file_path";
   $fingerprint_descriptorspec = array(
     0 => array('pipe', 'r'),
