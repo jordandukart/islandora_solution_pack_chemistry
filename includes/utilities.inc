@@ -95,7 +95,7 @@ function islandora_chemistry_get_rdf_from_chemspider($inchi_key) {
       'success' => FALSE,
       'data' => $response->data,
       'error' => $response->error,
-      'code' => '404',
+      'code' => $response->code,
     );
   }
 }
@@ -118,6 +118,7 @@ function islandora_chemistry_get_data_from_chemspider($inchi_key) {
   if ($rdf_response['success']) {
     // Need to parse the IUPAC name out of RDF.
     $rdf_xml = simplexml_load_string($rdf_response['data']);
+    $rdf_xml->registerXPathNamespace('chemdomain', 'http://www.polymerinformatics.com/ChemAxiom/ChemDomain.owl#');
     $iupac_xpath = $rdf_xml->xpath('chemdomain:Synonym/chemdomain:hasValue/text()');
     if ($iupac_xpath) {
       $iupac_name = (string) reset($iupac_xpath);
