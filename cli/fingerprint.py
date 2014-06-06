@@ -13,7 +13,7 @@ def hex2dec(s):
     """return the integer value of a hexadecimal string s"""
     return int(s, 16)
 
-mol1 = indigo.loadMoleculeFromFile(sys.argv[1]);
+mol1 = indigo.loadMolecule(sys.argv[1]);
 
 fp1 = mol1.fingerprint("sub");
 fp1string = fp1.toString();
