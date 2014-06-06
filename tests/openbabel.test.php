@@ -195,4 +195,38 @@ class OpenBabelTest extends PHPUnit_Framework_TestCase {
       $this->assertFileExists($temp_file, 'SMI file was created.');
     }
   }
+
+  /**
+   * Test that the standard input method appears to work.
+   *
+   * @dataProvider stdInFixtures
+   */
+  public function testStandardInputMethod($input_format, $mol_file) {
+    $temp_file = $this->tmp();
+    $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+      'o' => 'cml',
+      'O' => $temp_file,
+    ));
+    if ($input_format) {
+      $options['i'] = $input_format;
+    }
+    $result = \Islandora\Chemistry\OpenBabel\execute(
+      $mol_file,
+      $options,
+      '/usr/bin/obabel'
+    );
+    $this->assertFileExists($temp_file, 'CML file was created.');
+    $this->assertGreaterThan(0, filesize($temp_file));
+  }
+
+  /**
+   * Data provider to get test info for stdin.
+   */
+  public function stdInFixtures() {
+    return array(
+      array(FALSE, __DIR__ . '/fixtures/chemicals/example.mol'),
+      array('mol', __DIR__ . '/fixtures/chemicals/example.mol'),
+      array('cml', __DIR__ . '/fixtures/chemicals/example.cml'),
+    );
+  }
 }
