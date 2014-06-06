@@ -181,14 +181,13 @@ class OpenBabelTest extends IslandoraChemistryUnitTest {
   public function testStandardInputMethod($input_format, $mol_file) {
     $temp_file = $this->tmp();
     $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+      'i' => $input_format,
       'o' => 'cml',
       'O' => $temp_file,
     ));
-    if ($input_format) {
-      $options['i'] = $input_format;
-    }
+    $options->setStdIn(file_get_contents($mol_file));
     $result = \Islandora\Chemistry\OpenBabel\execute(
-      $mol_file,
+      FALSE,
       $options,
       '/usr/bin/obabel'
     );
@@ -201,7 +200,6 @@ class OpenBabelTest extends IslandoraChemistryUnitTest {
    */
   public function stdInFixtures() {
     return array(
-      array(FALSE, __DIR__ . '/fixtures/chemicals/example.mol'),
       array('mol', __DIR__ . '/fixtures/chemicals/example.mol'),
       array('cml', __DIR__ . '/fixtures/chemicals/example.cml'),
     );
