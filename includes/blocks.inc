@@ -276,9 +276,15 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
       $options
     );
     $inchi_key = islandora_chemistry_get_inchikey_from_mol($mol);
+
+    // This retrieves all parts of the fingerprint from the table, or inserts
+    // the new structure to avoid running identical calls in the future.
     $fingerprint_parts = islandora_chemistry_fingerprint($inchi_key, $cleaned_mol);
     $db_and = db_and();
     $count = 0;
+
+    // Need to construct the condition like this as there's is no nice way of
+    // handling bitwise conditions in Drupal's DB layer.
     foreach ($fingerprint_parts as $key => $val) {
       $db_and->where("$key & :val_$count=:val_$count", array(
         ":val_$count" => $val,
@@ -291,17 +297,10 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
       ->execute()
       ->fetchCol();
     $inchi_keys = array_map('islandora_chemistry_prepare_record_for_solr', $inchi_keys);
-    if (empty($inchi_keys)) {
-      $query = format_string('!inchi_field:gdsagdasdgsa', array(
-        '!inchi_field' => $inchi_key_solr_field,
-      ));
-    }
-    else {
-      $query = format_string('!inchi_field:(!inchi_keys)', array(
+    $query = format_string('!inchi_field:(!inchi_keys)', array(
         '!inchi_field' => $inchi_key_solr_field,
         '!inchi_keys' => implode(' OR ', $inchi_keys),
       ));
-    }
   }
   $form_state['redirect'] = "islandora/search/$query";
 }
