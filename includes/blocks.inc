@@ -261,7 +261,7 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
     $fragments = array_map('islandora_chemistry_prepare_record_for_solr', $fragments);
     $query = format_string('!fragment_field:(!fragments)', array(
       '!fragment_field' => $fragment_solr_field,
-      '!fragments' => implode(' OR ', $fragments),
+      '!fragments' => empty($fragments) ? '""' : implode(' OR ', $fragments),
     ));
   }
   else {
@@ -278,20 +278,32 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
     $inchi_key = islandora_chemistry_get_inchikey_from_mol($mol);
     $fingerprint_parts = islandora_chemistry_fingerprint($inchi_key, $cleaned_mol);
     $where_parts = array();
+    $db_and = db_and();
+    $count = 0;
     foreach ($fingerprint_parts as $key => $val) {
-      $where_parts[] = "{$key} &{$val} = {$val}";
+      $db_and->where("$key & :val_$count=:val_$count", array(
+        ":val_$count" => $val,
+      ));
+      $count++;
+      $where_parts[] = "{$key} & {$val} = {$val}";
     }
-    $result = db_query(format_string("SELECT inchikey FROM {islandora_chemistry_fingerprints} WHERE !finger_condition", array(
-      '!finger_condition' => implode(' AND ', $where_parts),
-    )));
-    foreach ($result as $record) {
-      $inchi_keys[] = $record->inchikey;
-    }
+    $inchi_keys = db_select('islandora_chemistry_fingerprints', 'i')
+      ->fields('i', array('inchikey'))
+      ->condition($db_and)
+      ->execute()
+      ->fetchCol();
     $inchi_keys = array_map('islandora_chemistry_prepare_record_for_solr', $inchi_keys);
-    $query = format_string('!inchi_field:(!inchi_keys)', array(
-      '!inchi_field' => $inchi_key_solr_field,
-      '!inchi_keys' => implode(' OR ', $inchi_keys),
-    ));
+    if (empty($inchi_keys)) {
+      $query = format_string('!inchi_field:gdsagdasdgsa', array(
+        '!inchi_field' => $inchi_key_solr_field,
+      ));
+    }
+    else {
+      $query = format_string('!inchi_field:(!inchi_keys)', array(
+        '!inchi_field' => $inchi_key_solr_field,
+        '!inchi_keys' => implode(' OR ', $inchi_keys),
+      ));
+    }
   }
   $form_state['redirect'] = "islandora/search/$query";
 }
