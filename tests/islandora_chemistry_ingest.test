@@ -129,6 +129,8 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
       'example.dx',
       'example.gau',
       'example.jdx',
+      // XXX: The example PDB file is too big for openbabel/checkmol.
+      'example.pdb',
     );
     $makes_derivatives = array_diff($files, $no_derivatives);
     $makes_no_derivatives = array_intersect($files, $no_derivatives);
