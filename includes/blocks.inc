@@ -277,7 +277,6 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
     );
     $inchi_key = islandora_chemistry_get_inchikey_from_mol($mol);
     $fingerprint_parts = islandora_chemistry_fingerprint($inchi_key, $cleaned_mol);
-    $where_parts = array();
     $db_and = db_and();
     $count = 0;
     foreach ($fingerprint_parts as $key => $val) {
@@ -285,7 +284,6 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
         ":val_$count" => $val,
       ));
       $count++;
-      $where_parts[] = "{$key} & {$val} = {$val}";
     }
     $inchi_keys = db_select('islandora_chemistry_fingerprints', 'i')
       ->fields('i', array('inchikey'))
