@@ -25,6 +25,7 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
   };
   $python = $get_default_value('islandora_chemistry_python', '/usr/bin/python');
   $obabel = $get_default_value('islandora_chemistry_openbabel', '/usr/bin/obabel');
+  $obprop = $get_default_value('islandora_chemistry_obprop', '/usr/bin/obprop');
   $cmmmsrv_host = $get_default_value('islandora_chemistry_cmmmsrv_host', 'localhost');
   $cmmmsrv_port = $get_default_value('islandora_chemistry_cmmmsrv_port', 55624);
   $inchi_field = $get_default_value('islandora_chemistry_inchikey_solr_field', 'cml_inchi_key');
@@ -41,6 +42,21 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
       '#ajax' => array(
         'callback' => 'islandora_chemistry_admin_settings_form_ajax_callback',
         'wrapper' => 'obabel-wrapper',
+        'effect' => 'fade',
+        'event' => 'change',
+      ),
+    ),
+    'islandora_chemistry_obprop' => array(
+      '#prefix' => '<div id="obprop-wrapper">',
+      '#suffix' => '</div>',
+      '#type' => 'textfield',
+      '#title' => t('OpenBabel Property Extractor'),
+      '#description' => t('"obprop" executable path<br/>!msg', array(
+                        '!msg' => islandora_executable_available_message($obprop))),
+      '#default_value' => $obprop,
+      '#ajax' => array(
+        'callback' => 'islandora_chemistry_admin_settings_form_ajax_callback',
+        'wrapper' => 'obprop-wrapper',
         'effect' => 'fade',
         'event' => 'change',
       ),

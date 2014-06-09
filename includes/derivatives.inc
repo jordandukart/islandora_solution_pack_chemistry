@@ -134,6 +134,8 @@ function islandora_chemistry_derive_jpeg_from_svg(AbstractObject $object, $width
  *   The object to which the datastream belongs.
  * @param string $source
  *   The datastream ID of the datastream to grab.
+ * @param string $dest_mime
+ *   The mimetype of the file output.
  * @param array $input_options
  *   An array of options as accepted by \Islandora\Chemistry\OpenBabel\Options.
  *   We force the "O" (output file) parameter to be a file we work with.
@@ -163,6 +165,38 @@ function islandora_chemistry_derive_file_from_openbabel(AbstractObject $object, 
     throw new IslandoraChemistryDerivativeException('Failed to transform.');
   }
   return file_save($output_file);
+}
+
+/**
+ * OpenBabel derivative helper.
+ *
+ * Grab the indicated datastream and return the output based on the $input
+ * options.
+ *
+ * @param AbstractObject $object
+ *   The object to which the datastream belongs.
+ * @param string $source
+ *   The datastream ID of the datastream to grab.
+ * @param array $input_options
+ *   An array of options as accepted by \Islandora\Chemistry\OpenBabel\Options.
+ *
+ * @return string
+ *   A string, which has been populated with the results of the OpenBabel call.
+ */
+function islandora_chemistry_derive_string_from_openbabel(AbstractObject $object, $source, $input_options) {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  module_load_include('inc', 'islandora_chemistry', 'includes/commands/openbabel');
+
+  $file = islandora_chemistry_derive_download_as_temp($object[$source]);
+  $name = drupal_tempnam('temporary://', 'islandora_chemistry');
+
+  $options = new Islandora\Chemistry\OpenBabel\Options($input_options);
+  $result = Islandora\Chemistry\OpenBabel\execute(
+    drupal_realpath($file->uri),
+    $options
+  );
+  file_delete($file);
+  return $result;
 }
 
 /**
@@ -250,4 +284,41 @@ function islandora_chemistry_imagemagick_convert($src, $dest, $args) {
 }
 
 class IslandoraChemistryDerivativeException extends Exception {
+}
+
+function islandora_chemistry_derive_cml(AbstractObject $object, $force = FALSE) {
+  if (isset($object['CML']) && !$force) {
+    return;
+  }
+
+  $to_return = array(
+    'success' => FALSE,
+    'messages' => array(),
+  );
+  $subs = array(
+    '@datastream' => 'CML',
+    '@id' => $object->id,
+  );
+  try {
+    $cml_string = islandora_chemistry_derive_string_from_openbabel($object, 'OBJ', 'CML', array(
+      'o' => 'cml',
+    ));
+    $cml_doc = new DOMDocument();
+    $cml_doc->loadXML($cml_string);
+    $to_return['success'] = TRUE;
+    $to_return['messages'][] = array(
+      'message' => t('Generated and added @datastream derivative to @id.'),
+      'message_sub' => $subs,
+      'type' => 'dsm',
+    );
+  }
+  catch (IslandoraChemistryDerivativeException $e) {
+    $to_return['messages'][] = array(
+      'message' => t('Failed when generating @datastream to add to @id.'),
+      'message_sub' => $subs,
+      'type' => 'dsm',
+    );
+  }
+
+  return $to_return;
 }

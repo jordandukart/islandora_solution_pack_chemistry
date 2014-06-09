@@ -179,6 +179,14 @@ function islandora_chemistry_islandora_sp_chem_cm_islandora_derivative() {
 
   $module_path = drupal_get_path('module', 'islandora_chemistry');
 
+  $derivatives['islandora_chemistry_cml'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'CML',
+    'function' => array(
+      'islandora_chemistry_derive_cml',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
   $derivatives['islandora_chemistry_mol'] = array(
     'source_dsid' => 'OBJ',
     'destination_dsid' => 'MOL',
