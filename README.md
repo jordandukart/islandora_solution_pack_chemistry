@@ -28,6 +28,12 @@ Install as usual, see [this](https://drupal.org/documentation/install/modules-th
 
 Configure each module/library as outlined in their respective installation instructions.
 
+## FAQ
+
+Q: What kind of limits exist for molecules?
+
+A: Checkmol (used for identifying functional fragments inside molecules) has a [limit of 1024 atoms](http://merian.pch.univie.ac.at/~nhaider/cheminf/cmmm.html#features). Additionally, some of the output formats for OpenBabel (generating InchiKeys in particular) handle at most 1000 atoms.
+
 ## Troubleshooting/Issues
 
 Having problems or solved a problem? Check out the Islandora google groups for a solution.
