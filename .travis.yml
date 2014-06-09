@@ -19,13 +19,14 @@ before_install:
   - sudo apt-get -y install openbabel fp-compiler
   - wget "http://merian.pch.univie.ac.at/pch/download/chemistry/checkmol/server/cmmmsrv.pas"
   - fpc cmmmsrv.pas -O3 -Op3
-  - start-stop-daemon --start --background --make-pidfile --oknodo --quiet --pidfile /var/run/cmmmsrv.pid --exec ./cmmmsrv
+  - sudo start-stop-daemon --start --background --make-pidfile --oknodo --quiet --pidfile /var/run/cmmmsrv.pid --exec ./cmmmsrv
   - wget "http://ggasoftware.com/downloads/indigo-1.1.12/indigo-python-1.1.12-linux.zip"
   - unzip indigo-python-1.1.12-linux.zip
   - cd $HOME/drupal-*
   - mv ../indigo-python-1.1.12-linux sites/all/libraries/indigo-python
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/islandora_solution_pack_chemistry
   - ln -s $HOME/islandora_solution_pack_collection sites/all/modules/islandora_solution_pack_collection
+  - drush -y -u 1 dl libraries && drush -y -u 1 en libraries
   - drush en --user=1 --yes islandora_basic_collection islandora_chemistry
 script:
   - ant -buildfile sites/all/modules/islandora_solution_pack_chemistry/build.xml lint
