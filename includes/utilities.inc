@@ -138,3 +138,27 @@ function islandora_chemistry_get_data_from_chemspider($inchi_key) {
     );
   }
 }
+
+/**
+ * Gets the InChIKey from a given MOL.
+ *
+ * @param string $mol
+ *   String representation of a molecule.
+ *
+ * @return string
+ *   The InChIKey for the molecule.
+ */
+function islandora_chemistry_get_inchikey_from_mol($mol) {
+  module_load_include('inc', 'islandora_chemistry', 'includes/commands/openbabel');
+  $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+    'i' => 'mol',
+    'o' => 'inchi',
+    'x' => 'K,',
+  ));
+  $options->setStdIn($mol);
+  $result = \Islandora\Chemistry\OpenBabel\execute(
+    FALSE,
+    $options
+  );
+  return $result;
+}

@@ -125,3 +125,195 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
     $tuque->repository->ingestObject($object);
   }
 }
+
+/**
+ * Defines the structure search block.
+ *
+ * @param array $form
+ *   An array representing a Drupal form.
+ * @param array $form_state
+ *   An array containing the Drupal form state.
+ *
+ * @return array
+ *   A renderable array of a Drupal form.
+ */
+function islandora_chemistry_structure_search_form($form, &$form_state) {
+  $chem_doodle_path = libraries_get_path('ChemDoodleWeb');
+  $chem_path = drupal_get_path('module', 'islandora_chemistry');
+  $element_id = drupal_html_id('islandora_chemistry_sketcher_canvas');
+  $form['sketcher_canvas'] = array(
+    '#type' => 'markup',
+    '#attached' => array(
+      'js' => array(
+        array(
+          'type' => 'setting',
+          'data' => array(
+            'islandora_chemistry_sketcher_canvas' => array(
+              'element_id' => $element_id,
+              'element_selector' => "#$element_id",
+              'hidden_field_selector' => "#islandora-chemistry-structure-search-form input[name=mol_value]",
+              'width' => 500,
+              'height' => 500,
+            ),
+          ),
+        ),
+        "$chem_path/js/detectmobilebrowser.js",
+        "$chem_doodle_path/install/ChemDoodleWeb.js",
+        "$chem_doodle_path/install/uis/ChemDoodleWeb-uis.js",
+        "$chem_path/js/sketchercanvas.js",
+      ),
+      'css' => array(
+        "$chem_doodle_path/install/ChemDoodleWeb.css",
+        "$chem_doodle_path/install/uis/jquery-ui-1.10.3.custom.css",
+      ),
+    ),
+    '#markup' => "<canvas id='$element_id'></canvas>",
+  );
+  $form['mol_value'] = array(
+    '#type' => 'hidden',
+  );
+  $form['search_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Search type'),
+    '#default_value' => 'inchi',
+    '#options' => array(
+      'inchi' => t('InChIKey'),
+      'substructure' => t('Substructure'),
+      'fragment' => t('Fragment'),
+    ),
+  );
+  $form['inchi_description'] = array(
+    '#type' => 'item',
+    '#description' => t("Matches the drawn molecule's InChIKey to existing molecules."),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="search_type"]' => array('value' => 'inchi'),
+      ),
+    ),
+  );
+  $form['substructure_description'] = array(
+    '#type' => 'item',
+    '#description' => t('Matches all substructures contained in the drawn molecule.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="search_type"]' => array('value' => 'substructure'),
+      ),
+    ),
+  );
+  $form['fragment_description'] = array(
+    '#type' => 'item',
+    '#description' => t('Matches all fragments contained in the drawn molecule.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="search_type"]' => array('value' => 'fragment'),
+      ),
+    ),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Search'),
+    '#attributes' => array(
+      'onclick' => 'Drupal.settings.islandora_chemistry_sketcher_canvas.grab_structure()',
+    ),
+  );
+  return $form;
+}
+
+/**
+ * Submit handler for the structure search block.
+ *
+ * @param array $form
+ *   An array representing a Drupal form.
+ * @param array $form_state
+ *   An array containing the Drupal form state.
+ */
+function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
+  module_load_include('inc', 'islandora_chemistry', 'includes/commands/openbabel');
+  module_load_include('inc', 'islandora_chemistry', 'includes/commands/checkmol');
+  module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
+
+  $mol = $form_state['values']['mol_value'];
+  $search_type = $form_state['values']['search_type'];
+  $inchi_key_solr_field = variable_get('islandora_chemistry_inchikey_solr_field', 'cml_inchi_key');
+  if ($search_type == 'inchi') {
+    $inchi_key = islandora_chemistry_get_inchikey_from_mol($mol);
+    $query = format_string('!inchi_field:"!inchi_key"', array(
+      '!inchi_field' => $inchi_key_solr_field,
+      '!inchi_key' => $inchi_key,
+    ));
+  }
+  elseif ($search_type == 'fragment') {
+    $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+      'i' => 'mol',
+      'o' => 'mol',
+    ));
+    $options->setStdIn($mol);
+    $cleaned_mol = \Islandora\Chemistry\OpenBabel\execute(
+      FALSE,
+      $options
+    );
+    $cm = new \Islandora\Chemistry\Checkmol(
+      variable_get('islandora_chemistry_cmmmsrv_host', 'localhost'),
+      variable_get('islandora_chemistry_cmmmsrv_port', 55624)
+    );
+    $fragment_solr_field = variable_get('islandora_chemistry_fragment_solr_field', 'cml_fragments');
+    $fragments = $cm->get8DigitCodes($cleaned_mol);
+    $fragments = array_map('islandora_chemistry_prepare_record_for_solr', $fragments);
+    $query = format_string('!fragment_field:(!fragments)', array(
+      '!fragment_field' => $fragment_solr_field,
+      '!fragments' => empty($fragments) ? '""' : implode(' OR ', $fragments),
+    ));
+  }
+  else {
+    module_load_include('inc', 'islandora_chemistry', 'includes/fingerprint');
+    $options = new \Islandora\Chemistry\OpenBabel\Options(array(
+      'i' => 'mol',
+      'o' => 'mol',
+    ));
+    $options->setStdIn($mol);
+    $cleaned_mol = \Islandora\Chemistry\OpenBabel\execute(
+      FALSE,
+      $options
+    );
+    $inchi_key = islandora_chemistry_get_inchikey_from_mol($mol);
+
+    // This retrieves all parts of the fingerprint from the table, or inserts
+    // the new structure to avoid running identical calls in the future.
+    $fingerprint_parts = islandora_chemistry_fingerprint($inchi_key, $cleaned_mol);
+    $db_and = db_and();
+    $count = 0;
+
+    // Need to construct the condition like this as there's is no nice way of
+    // handling bitwise conditions in Drupal's DB layer.
+    foreach ($fingerprint_parts as $key => $val) {
+      $db_and->where("$key & :val_$count=:val_$count", array(
+        ":val_$count" => $val,
+      ));
+      $count++;
+    }
+    $inchi_keys = db_select('islandora_chemistry_fingerprints', 'i')
+      ->fields('i', array('inchikey'))
+      ->condition($db_and)
+      ->execute()
+      ->fetchCol();
+    $inchi_keys = array_map('islandora_chemistry_prepare_record_for_solr', $inchi_keys);
+    $query = format_string('!inchi_field:(!inchi_keys)', array(
+        '!inchi_field' => $inchi_key_solr_field,
+        '!inchi_keys' => implode(' OR ', $inchi_keys),
+      ));
+  }
+  $form_state['redirect'] = "islandora/search/$query";
+}
+
+/**
+ * Helper function to wrap a value in quotes for Solr.
+ *
+ * @param string $value
+ *   The string to be quoted.
+ *
+ * @return string
+ *   The quoted string.
+ */
+function islandora_chemistry_prepare_record_for_solr($value) {
+  return format_string('"!value"', array('!value' => $value));
+}
