@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Asserts the validity of a MOL datastream.
+ * Asserts the validity of a CML datastream.
  */
 
 module_load_include('inc', 'islandora', 'tests/datastream_validators');
