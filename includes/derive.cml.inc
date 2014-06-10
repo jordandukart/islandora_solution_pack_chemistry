@@ -6,6 +6,8 @@
  */
 
 /**
+ * Acquire misc info to jam into the CML.
+ *
  * @return array
  *   An associative array containing:
  *   - inchikey: An array of inchikeys of the molecule.
@@ -34,6 +36,14 @@ function islandora_chemistry_derive_cml_get_info(AbstractObject $object) {
   return $to_return;
 }
 
+/**
+ * Acquire inchikey(s) for the given object.
+ *
+ * @param array $info
+ *   Reference to info being gathered.
+ * @param AbstractObject $object
+ *   The object for which info is being gathered.
+ */
 function islandora_chemistry_derive_cml_get_inchikey(array &$info, AbstractObject $object) {
   if (isset($info['inchikey'])) {
     return;
@@ -50,6 +60,16 @@ function islandora_chemistry_derive_cml_get_inchikey(array &$info, AbstractObjec
   );
 }
 
+/**
+ * Acquire synonyms for the given object.
+ *
+ * Depends on acquiring InChIKeys.
+ *
+ * @param array $info
+ *   Reference to info being gathered.
+ * @param AbstractObject $object
+ *   The object for which info is being gathered.
+ */
 function islandora_chemistry_derive_cml_get_synonyms(array &$info, AbstractObject $object) {
   if (isset($info['synonyms'])) {
     return;
@@ -66,6 +86,16 @@ function islandora_chemistry_derive_cml_get_synonyms(array &$info, AbstractObjec
   $info['synonyms'] = array_merge($info['synonyms'], islandora_chemistry_get_synonyms_from_cactus($info['inchikey']));
 }
 
+/**
+ * Acquire a title for the given object.
+ *
+ * Depends on acquiring synonyms.
+ *
+ * @param array $info
+ *   Reference to info being gathered.
+ * @param AbstractObject $object
+ *   The object for which info is being gathered.
+ */
 function islandora_chemistry_derive_cml_get_title(array &$info, AbstractObject $object) {
   if (isset($info['title'])) {
     return;
@@ -77,6 +107,15 @@ function islandora_chemistry_derive_cml_get_title(array &$info, AbstractObject $
   $info['title'] = $source ? reset($source) : FALSE;
 }
 
+
+/**
+ * Acquire a functional fragments for the given object.
+ *
+ * @param array $info
+ *   Reference to info being gathered.
+ * @param AbstractObject $object
+ *   The object for which info is being gathered.
+ */
 function islandora_chemistry_derive_cml_get_fragments(array &$info, AbstractObject $object) {
   if (isset($info['fragments'])) {
     return;
@@ -86,6 +125,14 @@ function islandora_chemistry_derive_cml_get_fragments(array &$info, AbstractObje
   $info['fragments'] = islandora_chemistry_checkmol_get_fragments($object);
 }
 
+/**
+ * Acquire properties from OpenBabel.
+ *
+ * @param array $info
+ *   Reference to info being gathered.
+ * @param AbstractObject $object
+ *   The object for which info is being gathered.
+ */
 function islandora_chemistry_derive_cml_get_properties(array &$info, AbstractObject $object) {
   $map = array(
     'mol_weight' => 'mweight',
@@ -98,7 +145,7 @@ function islandora_chemistry_derive_cml_get_properties(array &$info, AbstractObj
 
   module_load_include('inc', 'islandora_chemistry', 'includes/utilties');
   module_load_include('inc', 'islandora_chemistry', 'includes/derivatives');
-  $file =  islandora_chemistry_derive_download_as_temp($object['OBJ']);
+  $file = islandora_chemistry_derive_download_as_temp($object['OBJ']);
   $properties = islandora_chemistry_get_chem_properties($file->uri);
   file_delete($file);
 
