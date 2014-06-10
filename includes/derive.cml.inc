@@ -51,12 +51,12 @@ function islandora_chemistry_derive_cml_get_inchikey(array &$info, AbstractObjec
 
   module_load_include('inc', 'islandora_chemistry', 'includes/derivatives');
   $info += array(
-    'inchikey' => explode("\n", islandora_chemistry_derive_string_from_openbabel($object, 'MOL', array(
+    'inchikey' => array_unique(explode("\n", islandora_chemistry_derive_string_from_openbabel($object, 'MOL', array(
       'i' => 'mol',
       'separate' => TRUE,
       'o' => 'inchi',
       'x' => 'K',
-    ))),
+    )))),
   );
 }
 
