@@ -290,7 +290,8 @@ class IslandoraChemistryDerivativeException extends Exception {
  * Derivative callback for generating the CML.
  */
 function islandora_chemistry_derive_cml(AbstractObject $object, $force = FALSE) {
-  if (isset($object['CML']) && !$force) {
+  // We need the MOL eventually... Abort if it's not there...
+  if ((isset($object['CML']) && !$force) || !isset($object['MOL'])) {
     return;
   }
 
