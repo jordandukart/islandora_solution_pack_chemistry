@@ -29,7 +29,8 @@ script:
   - drush coder-review --reviews=production,security,style,i18n,potx,sniffer islandora_chemistry
 #not running tests because of dependency hell.
 #  - phpcpd --names *.module,*.inc,*.test sites/all/modules/islandora_solution_pack_chemistry
-#  - phpunit sites/all/modules/islandora_solution_pack_chemistry/tests/openbabel.test.php
+  - phpunit sites/all/modules/islandora_solution_pack_chemistry/tests/openbabel.test.php
+  - phpunit sites/all/modules/islandora_solution_pack_chemistry/tests/checkmol.test.php
   - drush test-run --uri=http://localhost:8081 "Islandora Chemistry"
 after_failure:
   - $ISLANDORA_DIR/tests/scripts/travis_after_failure.sh
