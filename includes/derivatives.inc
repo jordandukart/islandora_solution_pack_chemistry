@@ -286,6 +286,9 @@ function islandora_chemistry_imagemagick_convert($src, $dest, $args) {
 class IslandoraChemistryDerivativeException extends Exception {
 }
 
+/**
+ * Derivative callback for generating the CML.
+ */
 function islandora_chemistry_derive_cml(AbstractObject $object, $force = FALSE) {
   if (isset($object['CML']) && !$force) {
     return;
@@ -300,11 +303,32 @@ function islandora_chemistry_derive_cml(AbstractObject $object, $force = FALSE) 
     '@id' => $object->id,
   );
   try {
-    $cml_string = islandora_chemistry_derive_string_from_openbabel($object, 'OBJ', 'CML', array(
+    module_load_include('inc', 'islandora_chemistry', 'includes/derive.cml');
+    $cml_string = islandora_chemistry_derive_string_from_openbabel($object, 'OBJ', array(
       'o' => 'cml',
     ));
     $cml_doc = new DOMDocument();
+    $cml_doc->formatOutput = TRUE;
+    $cml_doc->preserveWhiteSpace = FALSE;
     $cml_doc->loadXML($cml_string);
+    islandora_chemistry_derive_cml_add_fields($object, $cml_doc);
+
+    $datastream = isset($object['CML']) ?
+      $object['CML'] :
+      $object->constructDatastream('CML', 'M');
+
+    if ($datastream->mimetype != 'chemical/x-cml') {
+      $datastream->mimetype = 'chemical/x-cml';
+    }
+    if ($datastream->label != 'CML Datastream') {
+      $datastream->label = 'CML Datastream';
+    }
+    $datastream->content = $cml_doc->saveXML();
+
+    if (!isset($object['CML'])) {
+      $object->ingestDatastream($datastream);
+    }
+
     $to_return['success'] = TRUE;
     $to_return['messages'][] = array(
       'message' => t('Generated and added @datastream derivative to @id.'),
@@ -321,4 +345,113 @@ function islandora_chemistry_derive_cml(AbstractObject $object, $force = FALSE) 
   }
 
   return $to_return;
+}
+
+/**
+ * Add fields to the CML document.
+ *
+ * @param AbstractObject $object
+ *   The object for which CML is being built.
+ * @param DOMDocument $cml_doc
+ *   A DOMDocument containing the parsed base to which to add.
+ */
+function islandora_chemistry_derive_cml_add_fields(AbstractObject $object, DOMDocument $cml_doc) {
+  module_load_include('inc', 'islandora_chemistry', 'includes/derive.cml');
+  $cml_ns = 'http://www.xml-cml.org/schema';
+  $xpath = new DOMXPath($cml_doc);
+  $xpath->registerNamespace('cml', $cml_ns);
+
+  // Add all of our values into appropriate locations in the CML.
+  $info = islandora_chemistry_derive_cml_get_info($object);
+  $info = array_filter($info);
+
+  // Little helper function for dealing with existing elements.
+  $empty_element = function (DOMElement $element) {
+    array_map(array($element, 'removeChild'), iterator_to_array($element->childNode));
+  };
+  // Ensure an entry for the CML schema is available.
+  $ensure_schema_def = function (DOMElement $element) use ($cml_ns) {
+    $schema_loc = $element->getAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'schemaLocation');
+    $schema_info = array_filter(preg_split('/\s+/', $schema_loc));
+    foreach (array_chunk($schema_info, 2) as $schema_def) {
+      list($ns_uri, $schema_uri) = $schema_def;
+      if ($ns_uri == $cml_ns) {
+        return;
+      }
+    }
+    $schema_info[] = $cml_ns;
+    $schema_info[] = file_create_url(drupal_get_path('module', 'islandora_chemistry') . '/xml/cml3-0_schema.xsd');
+    $element->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:schemaLocation', implode(' ', $schema_info));
+  };
+
+  $root = $cml_doc->documentElement;
+  $ensure_schema_def($root);
+  if (isset($info['inchikey'])) {
+    foreach ($info['inchikey'] as $key) {
+      $inchikey_elements = $xpath->query('cml:identifier[@convention="IUPAC:InChIKey"]', $root);
+      if ($inchikey_elements->length === 0) {
+        $inchikey_element = $cml_doc->createElementNS($cml_ns, 'identifier', $key);
+        $inchikey_element->setAttribute('convention', 'IUPAC:InChIKey');
+        $root->appendChild($inchikey_element);
+      }
+    }
+  }
+  if (isset($info['synonyms'])) {
+    $metadatalist_elements = $xpath->query('cml:metadataList[@role="synonyms" and @convention="islandora:sp_chem_CM"]', $root);
+    if ($metadatalist_elements->length !== 0) {
+      $metadatalist_element = $metadatalist_elements->item(0);
+      $empty_element($metadatalist_element);
+    }
+    else {
+      $metadatalist_element = $cml_doc->createElementNS($cml_ns, 'metadataList');
+      $metadatalist_element->setAttribute('convention', 'islandora:sp_chem_CM');
+      $metadatalist_element->setAttribute('role', 'synonyms');
+    }
+    foreach ($info['synonyms'] as $source => $values) {
+      foreach ($values as $synonym) {
+        $mde = $cml_doc->createElementNS($cml_ns, 'metadata', $synonym);
+        $mde->setAttribute('metadataType', $source);
+        $metadatalist_element->appendChild($mde);
+      }
+    }
+    $root->appendChild($metadatalist_element);
+  }
+  if (isset($info['title'])) {
+    $title_elements = $xpath->query('cml:name[@convention="islandora:sp_chem_CM" and @id="IUPAC_trivial"]', $root);
+    if ($title_elements->length === 0) {
+      $title_element = $cml_doc->createElementNS('http://www.xml-cml.org/schema', 'name', $info['title']);
+      $title_element->setAttribute('convention', 'islandora:sp_chem_CM');
+      $title_element->setAttribute('id', 'IUPAC_trivial');
+      $root->appendChild($title_element);
+    }
+  }
+
+  $list = array(
+    'formula' => 'formula',
+    'mweight' => 'molecular weight',
+    'inchi' => 'inchi',
+    'fragments' => 'functional fragment',
+  );
+  $list_intersection = array_intersect_key($list, $info);
+  if ($list_intersection) {
+    $metadatalist_elements = $xpath->query('cml:metadataList[@role="technical info" and @convention="islandora:sp_chem_CM"]', $root);
+    if ($metadatalist_elements->length !== 0) {
+      $metadatalist_element = $metadatalist_elements->item(0);
+      $empty_element($metadatalist_element);
+    }
+    else {
+      $metadatalist_element = $cml_doc->createElementNS($cml_ns, 'metadataList');
+      $metadatalist_element->setAttribute('convention', 'islandora:sp_chem_CM');
+      $metadatalist_element->setAttribute('role', 'technical info');
+    }
+    foreach ($list_intersection as $source => $type) {
+      foreach ((array) $info[$source] as $value) {
+        $mde = $cml_doc->createElementNS($cml_ns, 'metadata', $value);
+        $mde->setAttribute('metadataType', $type);
+        $metadatalist_element->appendChild($mde);
+      }
+    }
+    $root->appendChild($metadatalist_element);
+  }
+  $cml_doc->normalizeDocument();
 }

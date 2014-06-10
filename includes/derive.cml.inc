@@ -8,11 +8,13 @@
 /**
  * @return array
  *   An associative array containing:
- *   - inchikey: The inchikey of the molecule.
+ *   - inchikey: An array of inchikeys of the molecule.
  *   - synonyms: An array of synonyms.
  *   - title: The name of the molecule.
  *   - fragments: An array of fragments (Checkmol).
  *   - mweight: The molecular weight.
+ *   - formula: Molecular formula.
+ *   - inchi: The inchi of the molecule.
  */
 function islandora_chemistry_derive_cml_get_info(AbstractObject $object) {
   $to_return = array();
@@ -21,6 +23,7 @@ function islandora_chemistry_derive_cml_get_info(AbstractObject $object) {
     'islandora_chemistry_derive_cml_get_synonyms',
     'islandora_chemistry_derive_cml_get_title',
     'islandora_chemistry_derive_cml_get_fragments',
+    'islandora_chemistry_derive_cml_get_properties',
   );
   $args = array(&$to_return, $object);
 
@@ -38,12 +41,12 @@ function islandora_chemistry_derive_cml_get_inchikey(array &$info, AbstractObjec
 
   module_load_include('inc', 'islandora_chemistry', 'includes/derivatives');
   $info += array(
-    'inchikey' => islandora_chemistry_derive_string_from_openbabel($object, 'MOL', array(
+    'inchikey' => explode("\n", islandora_chemistry_derive_string_from_openbabel($object, 'MOL', array(
       'i' => 'mol',
       'separate' => TRUE,
       'o' => 'inchi',
       'x' => 'K',
-    )),
+    ))),
   );
 }
 
@@ -83,13 +86,13 @@ function islandora_chemistry_derive_cml_get_fragments(array &$info, AbstractObje
   $info['fragments'] = islandora_chemistry_checkmol_get_fragments($object);
 }
 
-function islandora_chemistry_derive_cml_get_properties($info, $object) {
+function islandora_chemistry_derive_cml_get_properties(array &$info, AbstractObject $object) {
   $map = array(
-    'mol_weight' => 'weight',
+    'mol_weight' => 'mweight',
     'formula' => 'formula',
     'InChI' => 'inchi',
   );
-  if (empty(array_diff_key(array_flip($map), $info))) {
+  if (!array_diff_key(array_flip($map), $info)) {
     return;
   }
 
@@ -101,7 +104,7 @@ function islandora_chemistry_derive_cml_get_properties($info, $object) {
 
   if ($properties) {
     $mol = reset($properties);
-    foreach ($map as $origin => $dest) {
+    foreach (array_intersect_key($map, $mol) as $origin => $dest) {
       $info[$dest] = $mol[$origin];
     }
   }

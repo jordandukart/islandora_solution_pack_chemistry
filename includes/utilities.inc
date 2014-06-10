@@ -236,7 +236,7 @@ function islandora_chemistry_get_chem_properties($file_uri) {
 
   $molecules = array_filter(array_map('trim', explode('$$$$', $output)));
   $map_molecules = function ($text) {
-    preg_match_all('/([^ ]+)\s+([^\n]+)/', $text, $matches);
+    preg_match_all('/([^ \n\t]+)\s+([^\n\t]+)/', $text, $matches);
     return array_combine($matches[1], $matches[2]);
   };
 
