@@ -4,7 +4,7 @@
  * Asserts the validity of a MOL datastream.
  */
 
-require_once __DIR__ . '/../../islandora/tests/datastream_validators.inc';
+module_load_include('inc', 'islandora', 'tests/datastream_validators');
 
 /**
  * A special DatastreamValidator specifically to verify MOL datastreams.
