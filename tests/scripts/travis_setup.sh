@@ -9,5 +9,3 @@ sudo chmod +x /etc/init.d/cmmmsrv
 sudo service cmmmsrv start
 wget "http://ggasoftware.com/downloads/indigo-1.1.12/indigo-python-1.1.12-linux.zip"
 unzip indigo-python-1.1.12-linux.zip
-cd $HOME/drupal-*
-mv ../indigo-python-1.1.12-linux sites/all/libraries/indigo-python
