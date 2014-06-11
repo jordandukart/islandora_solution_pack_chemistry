@@ -243,7 +243,7 @@ function islandora_chemistry_get_chem_properties($file_uri) {
 
   $molecules = array_filter(array_map('trim', explode('$$$$', $output)));
   $map_molecules = function ($text) {
-    // obprop gives a tab-separated-esque output with two columns:
+    // XXX: obprop gives a tab-separated-esque output with two columns:
     // - The first column indicates the "field"
     // - The second column contains the value for the given field.
     preg_match_all('/([^ \n\t]+)\s+([^\n\t]+)/', $text, $matches);
