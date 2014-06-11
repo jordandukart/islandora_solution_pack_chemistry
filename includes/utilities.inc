@@ -204,7 +204,7 @@ function islandora_chemistry_get_synonyms_from_cactus($inchi_key) {
  *   A file URI of the file to process.
  *
  * @return array
- *   A numerically index array of associative array, each containing:
+ *   A numerically index array of associative arrays, each containing:
  *   - name
  *   - formula
  *   - mol_weight
@@ -250,5 +250,18 @@ function islandora_chemistry_get_chem_properties($file_uri) {
     return array_combine($matches[1], $matches[2]);
   };
 
-  return array_map($map_molecules, $molecules);
+  $raw_output = array_map($map_molecules, $molecules);
+
+  // XXX: obprop will give a value of "-" (a hyphen) when it is unable to
+  // provide a value (an InChI value if there are more the 1000 atoms, for
+  // example). Let's filter these values out.
+  $no_value_filter = function ($field_value) {
+    return $field_value != '-';
+  };
+  $filtered_output = array();
+  foreach ($raw_output as $molecule) {
+    $filtered_output[] = array_filter($molecule, $no_value_filter);
+  }
+
+  return $filtered_output;
 }
