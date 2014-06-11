@@ -234,7 +234,10 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
 
   $mol = $form_state['values']['mol_value'];
   $search_type = $form_state['values']['search_type'];
-  $inchi_key_solr_field = variable_get('islandora_chemistry_inchikey_solr_field', 'cml_inchi_key');
+  $inchi_key_solr_field = variable_get(
+    'islandora_chemistry_inchikey_solr_field',
+    'cml_molecule_metadataList_mods_identifier_inchikey_ms'
+  );
   if ($search_type == 'inchi') {
     $inchi_key = islandora_chemistry_get_inchikey_from_mol($mol);
     $query = format_string('!inchi_field:"!inchi_key"', array(
@@ -256,7 +259,10 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
       variable_get('islandora_chemistry_cmmmsrv_host', 'localhost'),
       variable_get('islandora_chemistry_cmmmsrv_port', 55624)
     );
-    $fragment_solr_field = variable_get('islandora_chemistry_fragment_solr_field', 'cml_fragments');
+    $fragment_solr_field = variable_get(
+      'islandora_chemistry_fragment_solr_field',
+      'cml_molecule_metadataList_mods_note_functional fragment_ms'
+    );
     $fragments = $cm->get8DigitCodes($cleaned_mol);
     $fragments = array_map('islandora_chemistry_prepare_record_for_solr', $fragments);
     $query = format_string('!fragment_field:(!fragments)', array(
