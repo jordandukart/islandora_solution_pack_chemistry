@@ -80,6 +80,7 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
         'TN',
         'MEDIUM',
         'MOL',
+        'CML',
       ));
     }
     $this->assertDatastreams($object, $datastreams);
@@ -87,10 +88,12 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
     // Assert that datastreams we can validate are valid.
     if ($derivatives) {
       module_load_include('inc', 'islandora_chemistry', 'tests/mol_datastream_validator');
+      module_load_include('inc', 'islandora_chemistry', 'tests/cml_datastream_validator');
       $datastreams = array(
         array('TN', 'Image'),
         array('MEDIUM', 'Image'),
         array('MOL', 'MOL'),
+        array('CML', 'CML'),
       );
       $this->validateDatastreams($object, $datastreams);
     }

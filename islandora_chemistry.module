@@ -182,14 +182,25 @@ function islandora_chemistry_islandora_sp_chem_cm_islandora_derivative() {
   $derivatives['islandora_chemistry_mol'] = array(
     'source_dsid' => 'OBJ',
     'destination_dsid' => 'MOL',
+    'weight' => 0,
     'function' => array(
       'islandora_chemistry_derive_mol',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+  $derivatives['islandora_chemistry_cml'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'CML',
+    'weight' => 1,
+    'function' => array(
+      'islandora_chemistry_derive_cml',
     ),
     'file' => "$module_path/includes/derivatives.inc",
   );
   $derivatives['islandora_chemistry_medium'] = array(
     'source_dsid' => 'OBJ',
     'destination_dsid' => 'MEDIUM',
+    'weight' => 2,
     'function' => array(
       'islandora_chemistry_derive_medium',
     ),
@@ -198,6 +209,7 @@ function islandora_chemistry_islandora_sp_chem_cm_islandora_derivative() {
   $derivatives['islandora_chemistry_tn'] = array(
     'source_dsid' => 'OBJ',
     'destination_dsid' => 'TN',
+    'weight' => 2,
     'function' => array(
       'islandora_chemistry_derive_tn',
     ),

@@ -108,10 +108,11 @@ function islandora_chemistry_get_rdf_from_chemspider($inchi_key) {
  *
  * @return array
  *   An array containing:
- *   -iupac_name: A string denoting the IUPAC name or a message detailing
- *   the operation failing.
- *   -chemspider_url: A string denoting the ChemSpider URL for the structure
- *   matching the InChI key, or FALSE if the object didn't exist.
+ *   - iupac_name: A string denoting the IUPAC name or a message detailing
+ *     the operation failing.
+ *   - synonyms: An array of synonyms, if the request was successful.
+ *   - chemspider_url: A string denoting the ChemSpider URL for the structure
+ *     matching the InChI key, or FALSE if the object didn't exist.
  */
 function islandora_chemistry_get_data_from_chemspider($inchi_key) {
   $rdf_response = islandora_chemistry_get_rdf_from_chemspider($inchi_key);
@@ -128,6 +129,7 @@ function islandora_chemistry_get_data_from_chemspider($inchi_key) {
     }
     return array(
       'iupac_name' => $iupac_name,
+      'synonyms' => array_map('strval', $iupac_xpath),
       'chemspider_url' => $rdf_response['chemspider_url'],
     );
   }
@@ -161,4 +163,105 @@ function islandora_chemistry_get_inchikey_from_mol($mol) {
     $options
   );
   return $result;
+}
+
+/**
+ * Get synonyms for the given Inchi key(s).
+ *
+ * @param string|array $inchi_key
+ *   Either a string or and array of strings to look up.
+ *
+ * @return array
+ *   An associative array mapping the "classification" to an array containing
+ *   the synonym values.
+ */
+function islandora_chemistry_get_synonyms_from_cactus($inchi_key) {
+  $inchi_keys = is_array($inchi_key) ? $inchi_key : array($inchi_key);
+
+  $map_key_to_results = function ($key) {
+    $doc = new DOMDocument();
+    $doc->load("http://cactus.nci.nih.gov/chemical/structure/$key/names/xml");
+    $xpath = new DOMXPath($doc);
+    $synonyms = array();
+    foreach ($xpath->query('/request/data/item') as $item) {
+      $synonyms[$item->getAttribute('classification')][] = (string) $item->nodeValue;
+    }
+    return $synonyms;
+  };
+
+  $mapped_synonyms = array_map($map_key_to_results, $inchi_keys);
+  $merged_synonyms = empty($mapped_synonyms) ?
+    array() :
+    call_user_func_array('array_merge_recursive', $mapped_synonyms);
+  $unique_synonyms = array_map('array_unique', $merged_synonyms);
+  return $unique_synonyms;
+}
+
+/**
+ * Map output of obprop into arrays.
+ *
+ * @param string $file_uri
+ *   A file URI of the file to process.
+ *
+ * @return array
+ *   A numerically index array of associative arrays, each containing:
+ *   - name
+ *   - formula
+ *   - mol_weight
+ *   - exact_mass
+ *   - canonical_SMILES
+ *   - InChI
+ *   - num_atoms
+ *   - num_bonds
+ *   - num_residues
+ *   - sequence
+ *   - num_rings
+ *   - logP
+ *   - PSA
+ *   - MR
+ */
+function islandora_chemistry_get_chem_properties($file_uri) {
+  $desc_spec = array(
+    0 => array('pipe', 'r'),
+    1 => array('pipe', 'w'),
+    2 => array('pipe', 'w'),
+  );
+  $pipes = array();
+  $command = format_string('!command !file', array(
+    '!command' => escapeshellarg(variable_get('islandora_chemistry_obprop', '/usr/bin/obprop')),
+    '!file' => escapeshellarg(drupal_realpath($file_uri)),
+  ));
+  $proc = proc_open($command, $desc_spec, $pipes);
+  // Don't really need stdin...
+  fclose($pipes[0]);
+  // XXX: Some files generate a large amount of stderr output, which somehow
+  // will block the read from stdout (due to filling buffers, or something of
+  // the like?). Closing stderr stops it from blocking.
+  fclose($pipes[2]);
+  $output = stream_get_contents($pipes[1]);
+  fclose($pipes[1]);
+
+  $molecules = array_filter(array_map('trim', explode('$$$$', $output)));
+  $map_molecules = function ($text) {
+    // XXX: obprop gives a tab-separated-esque output with two columns:
+    // - The first column indicates the "field"
+    // - The second column contains the value for the given field.
+    preg_match_all('/([^ \n\t]+)\s+([^\n\t]+)/', $text, $matches);
+    return array_combine($matches[1], $matches[2]);
+  };
+
+  $raw_output = array_map($map_molecules, $molecules);
+
+  // XXX: obprop will give a value of "-" (a hyphen) when it is unable to
+  // provide a value (an InChI value if there are more the 1000 atoms, for
+  // example). Let's filter these values out.
+  $no_value_filter = function ($field_value) {
+    return $field_value != '-';
+  };
+  $filtered_output = array();
+  foreach ($raw_output as $molecule) {
+    $filtered_output[] = array_filter($molecule, $no_value_filter);
+  }
+
+  return $filtered_output;
 }
