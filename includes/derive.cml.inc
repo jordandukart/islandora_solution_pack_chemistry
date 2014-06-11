@@ -77,10 +77,14 @@ function islandora_chemistry_derive_cml_get_synonyms(array &$info, AbstractObjec
   islandora_chemistry_derive_cml_get_inchikey($info, $object);
 
   module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
-  $cs = islandora_chemistry_get_data_from_chemspider($info['inchikey']);
-  $info['synonyms']['chem_spider'] = isset($cs['synonyms']) ?
-    $cs['synonyms'] :
-    array();
+  $info['synonyms']['chem_spider'] = array();
+  foreach ($info['inchikey'] as $inchikey) {
+    $cs = islandora_chemistry_get_data_from_chemspider($inchikey);
+    if (!isset($cs['synonyms'])) {
+      continue;
+    }
+    $info['synonyms']['chem_spider'] = array_unique(array_merge($info['synonyms']['chem_spider'], $cs['synonyms']));
+  }
 
   $info['synonyms'] = array_merge($info['synonyms'], islandora_chemistry_get_synonyms_from_cactus($info['inchikey']));
 }
