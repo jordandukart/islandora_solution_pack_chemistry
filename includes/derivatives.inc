@@ -188,7 +188,6 @@ function islandora_chemistry_derive_string_from_openbabel(AbstractObject $object
   module_load_include('inc', 'islandora_chemistry', 'includes/commands/openbabel');
 
   $file = islandora_chemistry_derive_download_as_temp($object[$source]);
-  $name = drupal_tempnam('temporary://', 'islandora_chemistry');
 
   $options = new Islandora\Chemistry\OpenBabel\Options($input_options);
   $result = Islandora\Chemistry\OpenBabel\execute(
