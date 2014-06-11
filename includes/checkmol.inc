@@ -25,11 +25,17 @@ function islandora_chemistry_checkmol_get_fragments(AbstractObject $object) {
   $mol_file = islandora_temp_file_entry($mol_uri);
 
   module_load_include('inc', 'islandora_chemistry', 'includes/commands/checkmol');
-  $checkmol = new \Islandora\Chemistry\Checkmol(
-    variable_get('islandora_chemistry_cmmmsrv_host', 'localhost'),
-    variable_get('islandora_chemistry_cmmmsrv_port', 55624)
-  );
-  $to_return = $checkmol->get8DigitCodes($mol_file->uri);
-  file_delete($mol_file);
+  try {
+    $checkmol = new \Islandora\Chemistry\Checkmol(
+      variable_get('islandora_chemistry_cmmmsrv_host', 'localhost'),
+      variable_get('islandora_chemistry_cmmmsrv_port', 55624)
+    );
+    $to_return = $checkmol->get8DigitCodes($mol_file->uri);
+    file_delete($mol_file);
+  }
+  catch (Exception $e) {
+    file_delete($mol_file);
+    throw $e;
+  }
   return $to_return;
 }

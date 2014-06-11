@@ -51,11 +51,11 @@ function islandora_chemistry_derive_cml_get_inchikey(array &$info, AbstractObjec
 
   module_load_include('inc', 'islandora_chemistry', 'includes/derivatives');
   $info += array(
-    'inchikey' => explode("\n", islandora_chemistry_derive_string_from_openbabel($object, 'MOL', array(
+    'inchikey' => array_filter(explode("\n", islandora_chemistry_derive_string_from_openbabel($object, 'MOL', array(
       'i' => 'mol',
       'o' => 'inchi',
       'x' => 'K',
-    ))),
+    )))),
   );
 }
 
@@ -120,8 +120,16 @@ function islandora_chemistry_derive_cml_get_fragments(array &$info, AbstractObje
     return;
   }
 
-  module_load_include('inc', 'islandora_chemistry', 'includes/checkmol');
-  $info['fragments'] = islandora_chemistry_checkmol_get_fragments($object);
+  try {
+    module_load_include('inc', 'islandora_chemistry', 'includes/checkmol');
+    $info['fragments'] = islandora_chemistry_checkmol_get_fragments($object);
+  }
+  catch (InvalidArgumentException $e) {
+    watchdog_exception('islandora_chemistry', $e, 'No fragments could be extracted with Checkmol for @pid.', array(
+      '@pid' => $object->id,
+    ), WATCHDOG_NOTICE, l(t('view object'), "islandora/object/{$object->id}"));
+    $info['fragments'] = array();
+  }
 }
 
 /**

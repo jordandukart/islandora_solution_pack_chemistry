@@ -159,6 +159,7 @@ class Checkmol {
     $this->send(static::HASHES);
     $found_final_hashes = FALSE;
     $output = array();
+    $count = 0;
     while (!$found_final_hashes) {
       $line = $this->readline();
       if ($line !== FALSE) {

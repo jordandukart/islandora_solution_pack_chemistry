@@ -190,7 +190,9 @@ function islandora_chemistry_get_synonyms_from_cactus($inchi_key) {
   };
 
   $mapped_synonyms = array_map($map_key_to_results, $inchi_keys);
-  $merged_synonyms = call_user_func_array('array_merge_recursive', $mapped_synonyms);
+  $merged_synonyms = empty($mapped_synonyms) ?
+    array() :
+    call_user_func_array('array_merge_recursive', $mapped_synonyms);
   $unique_synonyms = array_map('array_unique', $merged_synonyms);
   return $unique_synonyms;
 }
@@ -225,14 +227,15 @@ function islandora_chemistry_get_chem_properties($file_uri) {
     2 => array('pipe', 'w'),
   );
   $pipes = array();
-  $proc = proc_open(format_string('!command !file', array(
-    '!command' => '/usr/bin/obprop',
-    '!file' => drupal_realpath($file_uri),
-  )), $desc_spec, $pipes);
+  $command = format_string('!command !file', array(
+    '!command' => escapeshellarg(variable_get('islandora_chemistry_obprop', '/usr/bin/obprop')),
+    '!file' => escapeshellarg(drupal_realpath($file_uri)),
+  ));
+  $proc = proc_open($command, $desc_spec, $pipes);
   fclose($pipes[0]);
+  fclose($pipes[2]);
   $output = stream_get_contents($pipes[1]);
   fclose($pipes[1]);
-  fclose($pipes[2]);
 
   $molecules = array_filter(array_map('trim', explode('$$$$', $output)));
   $map_molecules = function ($text) {
