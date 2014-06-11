@@ -232,13 +232,20 @@ function islandora_chemistry_get_chem_properties($file_uri) {
     '!file' => escapeshellarg(drupal_realpath($file_uri)),
   ));
   $proc = proc_open($command, $desc_spec, $pipes);
+  // Don't really need stdin...
   fclose($pipes[0]);
+  // XXX: Some files generate a large amount of stderr output, which somehow
+  // will block the read from stdout (due to filling buffers, or something of
+  // the like?). Closing stderr stops it from blocking.
   fclose($pipes[2]);
   $output = stream_get_contents($pipes[1]);
   fclose($pipes[1]);
 
   $molecules = array_filter(array_map('trim', explode('$$$$', $output)));
   $map_molecules = function ($text) {
+    // obprop gives a tab-separated-esque output with two columns:
+    // - The first column indicates the "field"
+    // - The second column contains the value for the given field.
     preg_match_all('/([^ \n\t]+)\s+([^\n\t]+)/', $text, $matches);
     return array_combine($matches[1], $matches[2]);
   };
