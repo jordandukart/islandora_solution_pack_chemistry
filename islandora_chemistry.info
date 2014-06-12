@@ -4,6 +4,7 @@ dependencies[] = islandora
 dependencies[] = libraries
 dependencies[] = islandora_basic_collection
 dependencies[] = imagemagick
+dependencies[] = islandora_binary_object
 files[] = includes/importer.inc
 files[] = includes/commands/openbabel.inc
 files[] = tests/fingerprint.test
