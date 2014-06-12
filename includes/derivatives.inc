@@ -468,6 +468,7 @@ function islandora_chemistry_derive_fingerprint(AbstractObject $object, $force =
 
   try {
     module_load_include('inc', 'islandora_chemistry', 'includes/fingerprint');
+    module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
     islandora_chemistry_fingerprint(
       islandora_chemistry_get_inchikey_from_mol($object['MOL']->content),
       $object['MOL']->content
