@@ -28,8 +28,14 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
   $obprop = $get_default_value('islandora_chemistry_obprop', '/usr/bin/obprop');
   $cmmmsrv_host = $get_default_value('islandora_chemistry_cmmmsrv_host', 'localhost');
   $cmmmsrv_port = $get_default_value('islandora_chemistry_cmmmsrv_port', 55624);
-  $inchi_field = $get_default_value('islandora_chemistry_inchikey_solr_field', 'cml_inchi_key');
-  $fragment_field = $get_default_value('islandora_chemistry_fragment_solr_field', 'cml_fragment');
+  $inchi_field = $get_default_value(
+    'islandora_chemistry_inchikey_solr_field',
+    'cml_molecule_metadataList_mods_identifier_inchikey_ms'
+  );
+  $fragment_field = $get_default_value(
+    'islandora_chemistry_fragment_solr_field',
+    'cml_molecule_metadataList_mods_note_functional fragment_ms'
+  );
   $form += array(
     'islandora_chemistry_openbabel' => array(
       '#prefix' => '<div id="obabel-wrapper">',
