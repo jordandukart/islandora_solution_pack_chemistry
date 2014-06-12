@@ -217,6 +217,7 @@ function islandora_chemistry_islandora_sp_chem_cm_islandora_derivative() {
   );
   $derivatives['islandora_chemistry_fingerprint'] = array(
     'source_dsid' => 'MOL',
+    'destination_dsid' => NULL,
     'function' => array(
       'islandora_chemistry_derive_fingerprint',
     ),
