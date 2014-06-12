@@ -94,7 +94,7 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
   $policy_content_models = $policy->getContentModels();
   $default_namespace = islandora_get_namespace($policy_content_models['islandora:sp_chem_CM']['namespace']);
   $file = file_load($form_state['values']['upload_file']);
-  if ($file->filemime == 'application/zip') {
+  if (in_array($file->filemime, array('application/x-zip', 'application/zip'))) {
     $params = array(
       'file' => file_load($form_state['values']['upload_file']),
       'pid_namespace' => $default_namespace,
@@ -123,6 +123,10 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
     $ds->mimetype = $form_state['values']['type_select_check'] ? $form_state['values']['options'] : $file->filemime;
     $ds->setContentFromFile($file->uri, FALSE);
     $tuque->repository->ingestObject($object);
+    drupal_set_message(t(
+      'Object ingested at <a href="@url">@id</a>',
+      array('@url' => url("islandora/object/{$object->id}"), '@id' => $object->id)
+    ));
   }
 }
 
