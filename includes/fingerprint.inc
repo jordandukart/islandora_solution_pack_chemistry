@@ -77,9 +77,10 @@ function islandora_chemistry_run_fingerprint($mol) {
   );
 
   fclose($fingerprint_pipes[0]);
+  // Close in case buffer fills.
+  fclose($fingerprint_pipes[2]);
   $fingerprint_process_output = stream_get_contents($fingerprint_pipes[1]);
   fclose($fingerprint_pipes[1]);
-  fclose($fingerprint_pipes[2]);
   $fingerprint_exit_code = proc_close($fingerprint_process);
 
   if ($fingerprint_exit_code) {

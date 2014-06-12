@@ -449,3 +449,43 @@ function islandora_chemistry_derive_cml_add_fields(AbstractObject $object, DOMDo
   }
   $cml_doc->normalizeDocument();
 }
+
+/**
+ * Derivative callback for fingerprinting.
+ */
+function islandora_chemistry_derive_fingerprint(AbstractObject $object, $force = FALSE) {
+  if (!isset($object['MOL'])) {
+    return;
+  }
+
+  $to_return = array(
+    'success' => TRUE,
+    'messages' => array(),
+  );
+  $subs = array(
+    '@id' => $object->id,
+  );
+
+  try {
+    module_load_include('inc', 'islandora_chemistry', 'includes/fingerprint');
+    islandora_chemistry_fingerprint(
+      islandora_chemistry_get_inchikey_from_mol($object['MOL']->content),
+      $object['MOL']->content
+    );
+
+    $to_return['messages'][] = array(
+      'message' => t('Generated and added fingerprint to the database for @id.'),
+      'message_sub' => $subs,
+      'type' => 'dsm',
+    );
+  }
+  catch (Exception $e) {
+    $to_return['success'] = FALSE;
+    $to_return['messages'][] = array(
+      'message' => t('Failed when generating the fingerprint for @id.'),
+      'message_sub' => $subs,
+      'type' => 'dsm',
+    );
+  }
+  return $to_return;
+}
