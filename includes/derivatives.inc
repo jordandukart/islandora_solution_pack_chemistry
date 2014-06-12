@@ -411,7 +411,7 @@ function islandora_chemistry_derive_cml_add_fields(AbstractObject $object, DOMDo
     }
   }
   if (isset($info['title'])) {
-    $title_info_element = $cml_doc->createElementNS($mods_ns, 'title_info');
+    $title_info_element = $cml_doc->createElementNS($mods_ns, 'titleInfo');
     $title_info_element->setAttribute('type', 'uniform');
     $title_info_element->setAttribute('authority', 'IUPAC:trivial');
     $title_element = $cml_doc->createElementNS($mods_ns, 'title', $info['title']);
