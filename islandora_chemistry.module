@@ -169,3 +169,136 @@ function islandora_chemistry_3d_view_access(AbstractObject $object) {
 function islandora_chemistry_output_view_access(AbstractObject $object) {
   return in_array('islandora:sp_chem_CM', $object->models) &&  islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['OBJ']);
 }
+
+/**
+ * Implements hook_block_info().
+ */
+function islandora_chemistry_block_info() {
+  return array(
+    'islandora_chemistry_upload' => array(
+      'info' => t('Islandora Chemistry Upload A File'),
+      'cache' => DRUPAL_NO_CACHE,
+    ),
+    'structure_search' => array(
+      'info' => t('Islandora Chemistry Structure Search'),
+      'cache' => DRUPAL_NO_CACHE,
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function islandora_chemistry_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'islandora_chemistry_upload':
+      if (user_access(ISLANDORA_INGEST)) {
+        module_load_include('inc', 'islandora_chemistry', 'includes/blocks');
+        $block['subject'] = t('Upload Structures');
+        $block['content'] = drupal_get_form('islandora_chemistry_upload_file_form');
+      }
+      break;
+
+    case 'structure_search':
+      if (user_access('search islandora solr')) {
+        module_load_include('inc', 'islandora_chemistry', 'includes/blocks');
+        $block['subject'] = t('Structure Search');
+        $block['content'] = drupal_get_form('islandora_chemistry_structure_search_form');
+      }
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function islandora_chemistry_menu() {
+  return array(
+    'admin/islandora/solution_pack_config/chemistry' => array(
+      'title' => 'Chemistry Solution Pack',
+      'description' => 'Configure Islandora Chemistry solution pack.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('islandora_chemistry_admin_settings_form'),
+      'access arguments' => array('administer site configuration'),
+      'file' => 'includes/admin.form.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+  );
+}
+
+/**
+ * Implements hook_CMODEL_PID_islandora_derivative().
+ */
+function islandora_chemistry_islandora_sp_chem_cm_islandora_derivative() {
+  $derivatives = array();
+
+  $module_path = drupal_get_path('module', 'islandora_chemistry');
+
+  $derivatives['islandora_chemistry_mol'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'MOL',
+    'weight' => 0,
+    'function' => array(
+      'islandora_chemistry_derive_mol',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+  $derivatives['islandora_chemistry_cml'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'CML',
+    'weight' => 1,
+    'function' => array(
+      'islandora_chemistry_derive_cml',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+  $derivatives['islandora_chemistry_medium'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'MEDIUM',
+    'weight' => 2,
+    'function' => array(
+      'islandora_chemistry_derive_medium',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+  $derivatives['islandora_chemistry_tn'] = array(
+    'source_dsid' => 'OBJ',
+    'destination_dsid' => 'TN',
+    'weight' => 2,
+    'function' => array(
+      'islandora_chemistry_derive_tn',
+    ),
+    'file' => "$module_path/includes/derivatives.inc",
+  );
+
+  return $derivatives;
+}
+
+/**
+ * Implements hook_file_mimetype_mapping_alter().
+ *
+ * Override mapping for chemical MIME-types, as some are mapped incorrectly,
+ * such as ".gam" being mapped to "chemical/x-gamess-input", while its proper
+ * mapping would be "chemical/x-gamess-output".
+ */
+function islandora_chemistry_file_mimetype_mapping_alter(&$mapping) {
+  $chem_filter = function ($mimetype) {
+    return strpos($mimetype, 'chemical/') === 0;
+  };
+
+  $mime_detect = new MimeDetect();
+  $types = $mime_detect->getMimeTypes();
+  $filtered_types = array_filter($types, $chem_filter);
+
+  $intersect = array_intersect_key($types, $mapping['extensions']);
+  foreach ($intersect as $ext => $mime) {
+    $keys = array_keys($mapping['mimetypes'], $mime);
+    if (empty($keys)) {
+      $mapping['mimetypes'][] = $mime;
+      $keys = array_keys($mapping['mimetypes'], $mime);
+    }
+    $mapping['extensions'][$ext] = reset($keys);
+  }
+}

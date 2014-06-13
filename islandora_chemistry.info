@@ -1,6 +1,13 @@
 name = "Islandora Chemistry Solution Pack"
-description = "A default Islandora module to handle storing chemical structures"
+description = "An Islandora Solution Pack for storing chemical structures."
 dependencies[] = islandora
+dependencies[] = libraries
+dependencies[] = islandora_basic_collection
+dependencies[] = imagemagick
+files[] = includes/importer.inc
+files[] = includes/commands/openbabel.inc
+files[] = tests/fingerprint.test
+files[] = tests/islandora_chemistry_ingest.test
 package = Islandora Solution Packs
 version = 7.x-dev
 core = 7.x
