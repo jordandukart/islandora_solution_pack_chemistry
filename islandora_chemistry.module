@@ -123,34 +123,6 @@ function islandora_chemistry_islandora_sp_chem_CM_islandora_view_object($object,
 }
 
 /**
- * Implements hook_menu().
- */
-function islandora_chemistry_menu() {
-  $items = array();
-
-  $items['islandora/object/%islandora_object/chemistry/3d-view'] = array(
-    'title' => '3D View',
-    'page callback' => 'islandora_chemistry_3d_view',
-    'page arguments' => array(2),
-    'access callback' => 'islandora_chemistry_3d_view_access',
-    'access arguments' => array(2),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/3d-view.tab.inc',
-  );
-  $items['islandora/object/%islandora_object/chemistry/output'] = array(
-    'title' => 'Output',
-    'page callback' => 'islandora_chemistry_output_view',
-    'page arguments' => array(2),
-    'access callback' => 'islandora_chemistry_output_view_access',
-    'access arguments' => array(2),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/output-view.tab.inc',
-  );
-
-  return $items;
-}
-
-/**
  * Access callback for 3D molecule view.
  *
  * @return bool
@@ -166,8 +138,8 @@ function islandora_chemistry_3d_view_access(AbstractObject $object) {
  * @return bool
  *   TRUE if the tab should be displayed; otherwise, FALSE.
  */
-function islandora_chemistry_output_view_access(AbstractObject $object) {
-  return in_array('islandora:sp_chem_CM', $object->models) &&  islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['OBJ']);
+function islandora_chemistry_output_view_access(AbstractObject $object, $dsid) {
+  return in_array('islandora:sp_chem_CM', $object->models) &&  islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object[$dsid]);
 }
 
 /**
@@ -215,17 +187,64 @@ function islandora_chemistry_block_view($delta = '') {
  * Implements hook_menu().
  */
 function islandora_chemistry_menu() {
-  return array(
-    'admin/islandora/solution_pack_config/chemistry' => array(
-      'title' => 'Chemistry Solution Pack',
-      'description' => 'Configure Islandora Chemistry solution pack.',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('islandora_chemistry_admin_settings_form'),
-      'access arguments' => array('administer site configuration'),
-      'file' => 'includes/admin.form.inc',
-      'type' => MENU_NORMAL_ITEM,
+  $items = array();
+
+  $items['islandora/object/%islandora_object/chemistry/3d-view'] = array(
+    'title' => '3D View',
+    'page callback' => 'islandora_chemistry_3d_view',
+    'page arguments' => array(2),
+    'access callback' => 'islandora_chemistry_3d_view_access',
+    'access arguments' => array(2),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/3d-view.tab.inc',
+  );
+  $datastream_views = array(
+    'source' => array(
+      // @codingStandardsIgnoreStart
+      // XXX: Overly cautious sniffs flagging craziness in coder...
+      t('Source'),
+      // @codingStandardsIgnoreEnd
+      'OBJ',
+    ),
+    'cml' => array(
+      // @codingStandardsIgnoreStart
+      // XXX: Overly cautious sniffs flagging craziness in coder...
+      t('CML'),
+      // @codingStandardsIgnoreEnd
+      'CML',
+    ),
+    'code' => array(
+      // @codingStandardsIgnoreStart
+      // XXX: Overly cautious sniffs flagging craziness in coder...
+      t('Code'),
+      // @codingStandardsIgnoreEnd
+      'CODE',
     ),
   );
+  foreach ($datastream_views as $path_suffix => $info) {
+    list($title, $dsid) = $info;
+    $items["islandora/object/%islandora_object/chemistry/$path_suffix"] = array(
+      'title' => '@title',
+      'title arguments' => array('@title' => $title),
+      'page callback' => 'islandora_chemistry_datastream_view',
+      'page arguments' => array(2, $dsid),
+      'access callback' => 'islandora_chemistry_output_view_access',
+      'access arguments' => array(2, $dsid),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'includes/output-view.tab.inc',
+    );
+  }
+  $items['admin/islandora/solution_pack_config/chemistry'] = array(
+    'title' => 'Chemistry Solution Pack',
+    'description' => 'Configure Islandora Chemistry solution pack.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_chemistry_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/admin.form.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
 }
 
 /**

@@ -137,10 +137,11 @@ function islandora_chemistry_get_title(AbstractObject $object) {
   }
 
   $cml = new SimpleXMLElement($object['CML']->content);
-  $cml->registerXPathNamespace('cml', 'http://www.xml-cml.org/schema/cml2/core');
+  $cml->registerXPathNamespace('cml', 'http://www.xml-cml.org/schema');
+  $cml->registerXPathNamespace('mods', 'http://www.loc.gov/mods/v3');
 
   // Attempt to use IUPAC:trivial name.
-  $titles = $cml->xpath('//cml:molecule/cml:name[@convention="IUPAC:trivial"]');
+  $titles = $cml->xpath('/cml:molecule/cml:metadataList[@convention="islandora:sp_chem_CM"]/mods:mods/mods:titleInfo[@type="uniform"]/mods:title');
   $title_element = reset($titles);
   if ($title_element) {
     $raw_title = (string) $title_element;
@@ -149,7 +150,7 @@ function islandora_chemistry_get_title(AbstractObject $object) {
   }
 
   // Fall-back to trying to use synonyms.
-  $synonyms = $cml->xpath('//cml:molecule/cml:alternative[@type="synonym"]');
+  $synonyms = $cml->xpath('/cml:molecule/cml:metadataList[@convention="islandora:sp_chem_CM"]/mods:mods/mods:titleInfo[@type="alternative"]/mods:title');
   $reducer = function ($carry, $current) {
     return array_merge($carry, explode(', ', (string) $current));
   };
@@ -160,7 +161,7 @@ function islandora_chemistry_get_title(AbstractObject $object) {
   }
 }
 
-/*
+/**
  * Searches for an IUPAC name and ChemSpider URL from an InChI key.
  *
  * @param string $inchi_key
