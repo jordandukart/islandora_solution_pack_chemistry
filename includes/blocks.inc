@@ -98,7 +98,12 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
 
   if ($form_state['values']['type_select_check'] && $form_state['values']['options'] == 'other') {
     $content_model = 'islandora:binaryObjectCModel';
-    $mimetype = $file->filemime;
+    if (in_array($file->filemime, array('application/x-zip', 'application/zip'))) {
+      $mimetype = 'application/octet-stream';
+    }
+    else {
+      $mimetype = $file->filemime;
+    }
   }
   else {
     $content_model = 'islandora:sp_chem_CM';
@@ -111,7 +116,7 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
       'pid_namespace' => $default_namespace,
       'content_model' => array($content_model),
       'processed_objects' => array(),
-      'file_mime' => 'application/octet-stream',
+      'file_mime' => $mimetype,
     );
     $preprocessor = new IslandoraChemistryZipBatchImporter(
       $tuque,
