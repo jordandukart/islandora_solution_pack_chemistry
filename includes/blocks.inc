@@ -20,6 +20,7 @@ function islandora_chemistry_upload_file_form($form, &$form_state) {
   form_load_include($form_state, 'inc', 'islandora_chemistry', 'includes/blocks');
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
   $options = islandora_chemistry_mime_selector();
+  $options['#options']['other'] = t('Other');
   $form['upload_file'] = array(
     '#title' => t('Upload A File'),
     '#type' => 'managed_file',
@@ -69,7 +70,7 @@ function islandora_chemistry_upload_file_form_validate($form, &$form_state) {
   }
   if ($chem_file && !$values['type_select_check']) {
     module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
-    if ($chem_file_mime == 'application/zip') {
+    if (in_array($chem_file_mime, array('application/x-zip', 'application/zip'))) {
       form_error($form['type_select_check'], t('A type is required when ingesting a ZIP.'));
     }
     elseif (!in_array($chem_file_mime, array_keys(islandora_chemistry_get_chemistry_mimes()))) {
@@ -94,13 +95,28 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
   $policy_content_models = $policy->getContentModels();
   $default_namespace = islandora_get_namespace($policy_content_models['islandora:sp_chem_CM']['namespace']);
   $file = file_load($form_state['values']['upload_file']);
-  if ($file->filemime == 'application/zip') {
+
+  if ($form_state['values']['type_select_check'] && $form_state['values']['options'] == 'other') {
+    $content_model = 'islandora:binaryObjectCModel';
+    if (in_array($file->filemime, array('application/x-zip', 'application/zip'))) {
+      $mimetype = 'application/octet-stream';
+    }
+    else {
+      $mimetype = $file->filemime;
+    }
+  }
+  else {
+    $content_model = 'islandora:sp_chem_CM';
+    $mimetype = $form_state['values']['type_select_check'] ? $form_state['values']['options'] : $file->filemime;
+  }
+
+  if (in_array($file->filemime, array('application/x-zip', 'application/zip'))) {
     $params = array(
       'file' => file_load($form_state['values']['upload_file']),
       'pid_namespace' => $default_namespace,
-      'content_model' => array('islandora:sp_chem_CM'),
+      'content_model' => array($content_model),
       'processed_objects' => array(),
-      'file_mime' => $form_state['values']['options'],
+      'file_mime' => $mimetype,
     );
     $preprocessor = new IslandoraChemistryZipBatchImporter(
       $tuque,
@@ -116,13 +132,17 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
     // @TODO: Set label via derivatives?
     $object = $tuque->repository->constructObject($default_namespace);
     $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:chemistry_collection');
-    $object->models = array('islandora:sp_chem_CM');
+    $object->models = array($content_model);
     $ds = $object->constructDatastream('OBJ', 'M');
     $object->ingestDatastream($ds);
     $ds->label = $file->filename;
-    $ds->mimetype = $form_state['values']['type_select_check'] ? $form_state['values']['options'] : $file->filemime;
+    $ds->mimetype = $mimetype;
     $ds->setContentFromFile($file->uri, FALSE);
     $tuque->repository->ingestObject($object);
+    drupal_set_message(t(
+      'Object ingested at <a href="@url">@id</a>',
+      array('@url' => url("islandora/object/{$object->id}"), '@id' => $object->id)
+    ));
   }
 }
 
