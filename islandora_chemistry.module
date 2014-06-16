@@ -14,6 +14,7 @@ function islandora_chemistry_theme($existing, $type, $theme, $path) {
       'template' => 'theme/islandora-chemistry',
       'pattern' => 'islandora_chemistry__',
       'variables' => array('islandora_object' => NULL),
+      'file' => 'theme/theme.inc',
     ),
   );
 }
