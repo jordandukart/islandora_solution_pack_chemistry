@@ -20,40 +20,50 @@
  *     - metadata: A metadata display.
  */
 function template_preprocess_islandora_chemistry(&$variables) {
-  $variables['elements']['image'] = array(
-    '#type' => 'markup',
-    '#theme' => 'image',
-    '#path' => "islandora/object/{$variables['islandora_object']->id}/datastream/MEDIUM/view",
-  );
+  if (islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $variables['islandora_object']['MEDIUM'])) {
+    $variables['elements']['image'] = array(
+      '#type' => 'markup',
+      '#theme' => 'image',
+      '#path' => "islandora/object/{$variables['islandora_object']->id}/datastream/MEDIUM/view",
+    );
+  }
+  else {
+    $variables['elements']['image'] = array();
+  }
 
-  $chem_doodle_path = libraries_get_path('ChemDoodleWeb');
-  $chem_path = drupal_get_path('module', 'islandora_chemistry');
-  $element_id = drupal_html_id('islandora_chemistry_3d_view');
-  $variables['elements']['viewer'] = array(
-    '#type' => 'markup',
-    '#attached' => array(
-      'js' => array(
-        array(
-          'type' => 'setting',
-          'data' => array(
-            'islandora_chemistry_3d_view' => array(
-              'mol_file' => $variables['islandora_object']['MOL']->content,
-              'element_id' => $element_id,
-              'element_selector' => "#$element_id",
-              'width' => 250,
-              'height' => 250,
+  if (islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $variables['islandora_object']['MOL'])) {
+    $chem_doodle_path = libraries_get_path('ChemDoodleWeb');
+    $chem_path = drupal_get_path('module', 'islandora_chemistry');
+    $element_id = drupal_html_id('islandora_chemistry_3d_view');
+    $variables['elements']['viewer'] = array(
+      '#type' => 'markup',
+      '#attached' => array(
+        'js' => array(
+          array(
+            'type' => 'setting',
+            'data' => array(
+              'islandora_chemistry_3d_view' => array(
+                'mol_file' => $variables['islandora_object']['MOL']->content,
+                'element_id' => $element_id,
+                'element_selector' => "#$element_id",
+                'width' => 250,
+                'height' => 250,
+              ),
             ),
           ),
+          "$chem_doodle_path/install/ChemDoodleWeb.js",
+          "$chem_path/js/3d-viewer.js",
         ),
-        "$chem_doodle_path/install/ChemDoodleWeb.js",
-        "$chem_path/js/3d-viewer.js",
+        'css' => array(
+          "$chem_doodle_path/install/ChemDoodleWeb.css",
+        ),
       ),
-      'css' => array(
-        "$chem_doodle_path/install/ChemDoodleWeb.css",
-      ),
-    ),
-    '#markup' => "<canvas id='$element_id'/>",
-  );
+      '#markup' => "<canvas id='$element_id'/>",
+    );
+  }
+  else {
+    $variables['elements']['viewer'] = array();
+  }
 
   module_load_include('inc', 'islandora', 'includes/metadata');
   $variables['elements']['metadata'] = array(
