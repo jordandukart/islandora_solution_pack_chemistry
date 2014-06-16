@@ -12,7 +12,8 @@
  *
  * @param array $variables
  *   An associative array containing:
- *   - object: An AbstractObject for which we are to render a display.
+ *   - islandora_object: An AbstractObject for which we are to render a
+ *     display.
  *   - elements: An array of renderable elements we populate, to include:
  *     - image: An image to output.
  *     - viewer: A ChemDoodle 3D view.
@@ -63,7 +64,7 @@ function template_preprocess_islandora_chemistry(&$variables) {
         'misc/collapse.js',
       ),
     ),
-    '#markup' => islandora_retrieve_metadata_markup($variables['islandora_object']),
+    '#markup' => islandora_retrieve_metadata_markup($variables['islandora_object'], TRUE),
   );
 }
 
