@@ -326,3 +326,30 @@ function islandora_chemistry_get_chem_properties($file_uri) {
 
   return $filtered_output;
 }
+
+/**
+ * Format representing a molecular formula for display.
+ *
+ * @param string $formula_string
+ *   A string representing a molecular formula.
+ *
+ * @return string
+ *   The formula, marked up with super- and sub-scripts.
+ */
+function islandora_chemistry_format_molecular_formula($formula_string) {
+  $formula = str_replace(' ', '', $formula_string);
+  $formula = preg_replace('/([0-9])/', '<sub>$1</sub>', $formula);
+
+  $replace = array(
+    '----' => '<sup>4-</sup>',
+    '---' => '<sup>3-</sup>',
+    '--' => '<sup>2-</sup>',
+    '++++' => '<sup>4+</sup>',
+    '+++' => '<sup>3+</sup>',
+    '++' => '<sup>2+</sup>',
+  );
+
+  $formula = str_replace(array_keys($replace), array_values($replace), $formula);
+
+  return $formula;
+}

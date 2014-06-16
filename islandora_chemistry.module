@@ -321,3 +321,15 @@ function islandora_chemistry_file_mimetype_mapping_alter(&$mapping) {
     $mapping['extensions'][$ext] = reset($keys);
   }
 }
+
+/**
+ * Implements hook_process_islandora_solr_metadata_display().
+ */
+function islandora_chemistry_process_islandora_solr_metadata_display(array &$variables) {
+  // Format molecular formulas.
+  $formula_field = 'cml_molecule_metadataList_mods_note_formula_ms';
+  if (isset($variables['solr_fields'][$formula_field]['value'])) {
+    module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
+    $variables['solr_fields'][$formula_field]['value'] = array_map('islandora_chemistry_format_molecular_formula', $variables['solr_fields'][$formula_field]['value']);
+  }
+}
