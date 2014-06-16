@@ -190,15 +190,6 @@ function islandora_chemistry_block_view($delta = '') {
 function islandora_chemistry_menu() {
   $items = array();
 
-  $items['islandora/object/%islandora_object/chemistry/3d-view'] = array(
-    'title' => '3D View',
-    'page callback' => 'islandora_chemistry_3d_view',
-    'page arguments' => array(2),
-    'access callback' => 'islandora_chemistry_3d_view_access',
-    'access arguments' => array(2),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/3d-view.tab.inc',
-  );
   $datastream_views = array(
     'source' => array(
       // @codingStandardsIgnoreStart
