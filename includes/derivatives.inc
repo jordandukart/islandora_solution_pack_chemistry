@@ -339,7 +339,7 @@ function islandora_chemistry_derive_cml(AbstractObject $object, $force = FALSE) 
     try {
       module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
       $title = islandora_chemistry_get_title($object);
-      if ($object->label != $title) {
+      if (!empty($title) && $object->label != $title) {
         $object->label = $title;
         $to_return['messages'][] = array(
           'message' => t('Set title of @id to "@title".'),
