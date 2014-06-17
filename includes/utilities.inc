@@ -5,24 +5,6 @@
  * Holds helper functions for the Islandora Chemistry Solution Pack.
  */
 
-
-/**
- * Set the title of the page to something more appropriate.
- *
- * This would be better done by setting the label during the ingest proper...
- * nowhere this is really able to be done, at the time of writing. (Would be
- * when generating the CML derivative).
- *
- * @param AbstractObject $object
- *   The object for which to set the title.
- */
-function islandora_chemistry_set_title(AbstractObject $object) {
-  $title = islandora_chemistry_get_title($object);
-  if ($title) {
-    drupal_set_title($title);
-  }
-}
-
 /**
  * Get a select drop down form element for selecting a chemistry MIME type.
  *

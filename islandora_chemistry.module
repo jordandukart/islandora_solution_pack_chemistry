@@ -111,9 +111,6 @@ function islandora_chemistry_islandora_sp_chem_CM_islandora_ingest_steps() {
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
 function islandora_chemistry_islandora_sp_chem_CM_islandora_view_object($object, $page_number, $page_size) {
-  module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
-  islandora_chemistry_set_title($object);
-
   return array(
     'islandora_chemistry' => array(
       '#type' => 'markup',

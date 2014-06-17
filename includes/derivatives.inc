@@ -335,6 +335,12 @@ function islandora_chemistry_derive_cml(AbstractObject $object, $force = FALSE) 
       'message_sub' => $subs,
       'type' => 'dsm',
     );
+
+    module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
+    $title = islandora_chemistry_get_title($object);
+    if ($object->label != $title) {
+      $object->label = $title
+    }
   }
   catch (IslandoraChemistryDerivativeException $e) {
     $to_return['messages'][] = array(

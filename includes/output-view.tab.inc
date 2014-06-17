@@ -15,9 +15,6 @@
  *   A renderable array.
  */
 function islandora_chemistry_datastream_view(AbstractObject $object, $dsid = 'OBJ') {
-  module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
-  islandora_chemistry_set_title($object);
-
   $datastream = $object[$dsid];
   $output = array(
     array(
@@ -27,6 +24,8 @@ function islandora_chemistry_datastream_view(AbstractObject $object, $dsid = 'OB
     ),
   );
   // MIME-Types of text-based file formats.
+  // TODO: Create a more complete MIME-Type mapping, to avoid having arrays of
+  // MIME-Types scattered through the code.
   $text_chemical_mimes = array(
     'chemical/x-cml',
     'chemical/x-mdl-molfile',
