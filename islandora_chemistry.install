@@ -27,6 +27,7 @@ function islandora_chemistry_uninstall() {
     'islandora_chemistry_obprop',
     'islandora_chemistry_inchikey_solr_field',
     'islandora_chemistry_fragment_solr_field',
+    'islandora_chemistry_formula_solr_field',
     'islandora_chemistry_cmmmsrv_host',
     'islandora_chemistry_cmmmsrv_port',
   );
