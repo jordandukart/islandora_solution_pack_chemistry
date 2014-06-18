@@ -166,7 +166,7 @@ function islandora_chemistry_structure_search_form($form, &$form_state) {
     )
   );
   $matches = array();
-  $match = preg_match("/$inchikey_solr_field\:\"(.*)\"/", current_path(), $matches);
+  $match = preg_match("/$inchikey_solr_field\:\(?\"(.*)\"\(?/", current_path(), $matches);
   if ($match) {
     $inchikey = $matches[1];
   }
