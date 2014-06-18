@@ -22,7 +22,9 @@ This module requires the following modules/libraries:
 
 ## Installation
 
-Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
+For the module itself, install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
+
+For ChemDoodleWeb, [download](http://web.chemdoodle.com/installation/download) and unzip the library such that the `ChemDoodleWeb.js` is located in `sites/all/libraries/ChemDoodleWeb/install/ChemDoodleWeb.js`.
 
 ## Configuration
 

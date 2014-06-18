@@ -101,6 +101,49 @@ function islandora_chemistry_get_rdf_from_chemspider($inchi_key) {
 }
 
 /**
+ * Get something to use as a title.
+ *
+ * Try to sniff something to use as a more usable title out of the CML.
+ *
+ * @param AbstractObject $object
+ *   The object for which to sniff a title.
+ *
+ * @return string|bool
+ *   Either a string containing the sniffed title, or FALSE if we didn't find
+ *   anything.
+ */
+function islandora_chemistry_get_title(AbstractObject $object) {
+  if (!(isset($object['CML']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['CML']))) {
+    // Do not have CML to fetch from...
+    return FALSE;
+  }
+
+  $cml = new SimpleXMLElement($object['CML']->content);
+  $cml->registerXPathNamespace('cml', 'http://www.xml-cml.org/schema');
+  $cml->registerXPathNamespace('mods', 'http://www.loc.gov/mods/v3');
+
+  // Attempt to use IUPAC:trivial name.
+  $titles = $cml->xpath('/cml:molecule/cml:metadataList[@convention="islandora:sp_chem_CM"]/mods:mods/mods:titleInfo[@type="uniform"]/mods:title');
+  $title_element = reset($titles);
+  if ($title_element) {
+    $raw_title = (string) $title_element;
+    $title = ucfirst(strtolower(ltrim($raw_title)));
+    return $title;
+  }
+
+  // Fall-back to trying to use synonyms.
+  $synonyms = $cml->xpath('/cml:molecule/cml:metadataList[@convention="islandora:sp_chem_CM"]/mods:mods/mods:titleInfo[@type="alternative"]/mods:title');
+  $reducer = function ($carry, $current) {
+    return array_merge($carry, explode(', ', (string) $current));
+  };
+  $synonym_strings = array_reduce($synonyms, $reducer, array());
+  $synonym = reset($synonym_strings);
+  if ($synonym) {
+    return $synonym;
+  }
+}
+
+/**
  * Searches for an IUPAC name and ChemSpider URL from an InChI key.
  *
  * @param string $inchi_key
@@ -264,4 +307,31 @@ function islandora_chemistry_get_chem_properties($file_uri) {
   }
 
   return $filtered_output;
+}
+
+/**
+ * Format representing a molecular formula for display.
+ *
+ * @param string $formula_string
+ *   A string representing a molecular formula.
+ *
+ * @return string
+ *   The formula, marked up with super- and sub-scripts.
+ */
+function islandora_chemistry_format_molecular_formula($formula_string) {
+  $formula = str_replace(' ', '', $formula_string);
+  $formula = preg_replace('/([0-9])/', '<sub>$1</sub>', $formula);
+
+  $replace = array(
+    '----' => '<sup>4-</sup>',
+    '---' => '<sup>3-</sup>',
+    '--' => '<sup>2-</sup>',
+    '++++' => '<sup>4+</sup>',
+    '+++' => '<sup>3+</sup>',
+    '++' => '<sup>2+</sup>',
+  );
+
+  $formula = str_replace(array_keys($replace), array_values($replace), $formula);
+
+  return $formula;
 }
