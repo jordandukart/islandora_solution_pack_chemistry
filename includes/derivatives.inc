@@ -335,6 +335,29 @@ function islandora_chemistry_derive_cml(AbstractObject $object, $force = FALSE) 
       'message_sub' => $subs,
       'type' => 'dsm',
     );
+
+    try {
+      module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
+      $title = islandora_chemistry_get_title($object);
+      if (!empty($title) && $object->label != $title) {
+        $object->label = $title;
+        $to_return['messages'][] = array(
+          'message' => t('Set title of @id to "@title".'),
+          'message_sub' => $subs + array(
+            '@title' => $title,
+          ),
+          'type' => 'dsm',
+        );
+      }
+    }
+    catch (Exception $e) {
+      $to_return['success'] = FALSE;
+      $to_return['messages'][] = array(
+        'message' => t('Failed setting title of @id.'),
+        'message_sub' => $subs,
+        'type' => 'dsm',
+      );
+    }
   }
   catch (IslandoraChemistryDerivativeException $e) {
     $to_return['messages'][] = array(

@@ -14,6 +14,7 @@ function islandora_chemistry_theme($existing, $type, $theme, $path) {
       'template' => 'theme/islandora-chemistry',
       'pattern' => 'islandora_chemistry__',
       'variables' => array('islandora_object' => NULL),
+      'file' => 'theme/theme.inc',
     ),
   );
 }
@@ -110,7 +111,33 @@ function islandora_chemistry_islandora_sp_chem_CM_islandora_ingest_steps() {
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
 function islandora_chemistry_islandora_sp_chem_CM_islandora_view_object($object, $page_number, $page_size) {
-  return theme('islandora_chemistry', array('islandora_object' => $object));
+  return array(
+    'islandora_chemistry' => array(
+      '#type' => 'markup',
+      '#theme' => 'islandora_chemistry',
+      '#islandora_object' => $object,
+    ),
+  );
+}
+
+/**
+ * Access callback for 3D molecule view.
+ *
+ * @return bool
+ *   TRUE if the tab should be displayed; otherwise, FALSE.
+ */
+function islandora_chemistry_3d_view_access(AbstractObject $object) {
+  return isset($object['MOL']) && in_array('islandora:sp_chem_CM', $object->models) &&  islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['MOL']);
+}
+
+/**
+ * Access callback for output view.
+ *
+ * @return bool
+ *   TRUE if the tab should be displayed; otherwise, FALSE.
+ */
+function islandora_chemistry_output_view_access(AbstractObject $object, $dsid) {
+  return in_array('islandora:sp_chem_CM', $object->models) &&  islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object[$dsid]);
 }
 
 /**
@@ -158,17 +185,55 @@ function islandora_chemistry_block_view($delta = '') {
  * Implements hook_menu().
  */
 function islandora_chemistry_menu() {
-  return array(
-    'admin/islandora/solution_pack_config/chemistry' => array(
-      'title' => 'Chemistry Solution Pack',
-      'description' => 'Configure Islandora Chemistry solution pack.',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('islandora_chemistry_admin_settings_form'),
-      'access arguments' => array('administer site configuration'),
-      'file' => 'includes/admin.form.inc',
-      'type' => MENU_NORMAL_ITEM,
+  $items = array();
+
+  $datastream_views = array(
+    'source' => array(
+      // @codingStandardsIgnoreStart
+      // XXX: Overly cautious sniffs flagging craziness in coder...
+      t('Source'),
+      // @codingStandardsIgnoreEnd
+      'OBJ',
+    ),
+    'cml' => array(
+      // @codingStandardsIgnoreStart
+      // XXX: Overly cautious sniffs flagging craziness in coder...
+      t('CML'),
+      // @codingStandardsIgnoreEnd
+      'CML',
+    ),
+    'code' => array(
+      // @codingStandardsIgnoreStart
+      // XXX: Overly cautious sniffs flagging craziness in coder...
+      t('Code'),
+      // @codingStandardsIgnoreEnd
+      'CODE',
     ),
   );
+  foreach ($datastream_views as $path_suffix => $info) {
+    list($title, $dsid) = $info;
+    $items["islandora/object/%islandora_object/chemistry/$path_suffix"] = array(
+      'title' => '@title',
+      'title arguments' => array('@title' => $title),
+      'page callback' => 'islandora_chemistry_datastream_view',
+      'page arguments' => array(2, $dsid),
+      'access callback' => 'islandora_chemistry_output_view_access',
+      'access arguments' => array(2, $dsid),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'includes/output-view.tab.inc',
+    );
+  }
+  $items['admin/islandora/solution_pack_config/chemistry'] = array(
+    'title' => 'Chemistry Solution Pack',
+    'description' => 'Configure Islandora Chemistry solution pack.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_chemistry_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/admin.form.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
 }
 
 /**
@@ -251,5 +316,17 @@ function islandora_chemistry_file_mimetype_mapping_alter(&$mapping) {
       $keys = array_keys($mapping['mimetypes'], $mime);
     }
     $mapping['extensions'][$ext] = reset($keys);
+  }
+}
+
+/**
+ * Implements hook_process_islandora_solr_metadata_display().
+ */
+function islandora_chemistry_process_islandora_solr_metadata_display(array &$variables) {
+  // Format molecular formulas.
+  $formula_field = variable_get('islandora_chemistry_formula_solr_field', 'cml_molecule_metadataList_mods_note_formula_ms');
+  if (isset($variables['solr_fields'][$formula_field]['value'])) {
+    module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
+    $variables['solr_fields'][$formula_field]['value'] = array_map('islandora_chemistry_format_molecular_formula', $variables['solr_fields'][$formula_field]['value']);
   }
 }

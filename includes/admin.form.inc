@@ -36,6 +36,10 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
     'islandora_chemistry_fragment_solr_field',
     'cml_molecule_metadataList_mods_note_functional fragment_ms'
   );
+  $formula_field = $get_default_value(
+    'islandora_chemistry_formula_solr_field',
+    'cml_molecule_metadataList_mods_note_formula_ms'
+  );
   $form += array(
     'islandora_chemistry_openbabel' => array(
       '#prefix' => '<div id="obabel-wrapper">',
@@ -133,6 +137,11 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
         '#type' => 'textfield',
         '#title' => t('Fragment Solr Field'),
         '#default_value' => $fragment_field,
+      ),
+      'islandora_chemistry_formula_solr_field' => array(
+        '#type' => 'textfield',
+        '#title' => t('Formula Solr Field'),
+        '#default_value' => $formula_field,
       ),
     ),
   );
