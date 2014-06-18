@@ -8,6 +8,11 @@
                 canvas.specs.atoms_useJMOLColors = true;
                 canvas.specs.bonds_clearOverlaps_2D = true;
                 canvas.specs.bonds_overlapClearWidth_2D = 2;
+                var starting_value = $(chem_settings.hidden_field_selector).val();
+                if (starting_value) {
+                  var starting_mol = ChemDoodle.readMOL(starting_value);
+                  canvas.loadMolecule(starting_mol);
+                }
                 canvas.repaint();
                 chem_settings.grab_structure = function() {
                     var mol = canvas.getMolecule();
