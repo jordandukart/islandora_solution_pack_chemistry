@@ -127,11 +127,6 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
     // array in two based on this list.
     $no_derivatives = array(
       'example.inp',
-      'example.c3d',
-      'example.chm',
-      'example.dx',
-      'example.gau',
-      'example.jdx',
       // XXX: The example PDB file is too big for openbabel/checkmol.
       'example.pdb',
     );
@@ -162,18 +157,13 @@ class IslandoraChemistryIngestTestCase extends IslandoraCollectionWebTestCase {
    */
   protected function getFileTypeSelect($name) {
     $list = array(
-      'example.c3d' => 'chemical/x-chem3d',
       'example.cdx' => 'chemical/x-cdx',
-      'example.chm' => 'chemical/x-chemdraw',
       'example.cif' => 'chemical/x-cif',
       'example.cml' => 'chemical/x-cml',
       'example.cub' => 'chemical/x-gaussian-cube',
-      'example.dx' => 'chemical/x-jcamp-dx',
       'example.gal' => 'chemical/x-gaussian-log',
       'example.gam' => 'chemical/x-gamess-output',
-      'example.gau' => 'chemical/x-gaussian-input',
       'example.inp' => 'chemical/x-gamess-input',
-      'example.jdx' => 'chemical/x-jcamp-dx',
       'example.mol' => 'chemical/x-mdl-molfile',
       'example.mop' => 'chemical/x-mopac-input',
       'example.pdb' => 'chemical/x-pdb',
