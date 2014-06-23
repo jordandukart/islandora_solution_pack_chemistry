@@ -21,20 +21,15 @@ function islandora_chemistry_upload_file_form($form, &$form_state) {
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
   $options = islandora_chemistry_mime_selector();
   $options['#options']['other'] = t('Other');
-  $form['upload_file'] = array(
-    '#title' => t('Upload A File'),
-    '#type' => 'managed_file',
+  $form['file'] = array(
+    '#title' => t('Choose A File'),
+    '#type' => 'file',
     '#required' => TRUE,
     '#description' => t(
       'Select file to upload.<br/>Files must be less than <strong>@size MB</strong>.',
       array('@size' => $upload_size)
     ),
     '#default_value' => isset($form_state['values']['upload_file']) ? $form_state['values']['upload_file'] : FALSE,
-    '#upload_location' => 'temporary://',
-    '#upload_validators' => array(
-      'file_validate_extensions' => array(),
-      'file_validate_size' => array($upload_size * 1024 * 1024),
-    ),
   );
   $form['type_select_check'] = array(
     '#type' => 'checkbox',
@@ -49,7 +44,7 @@ function islandora_chemistry_upload_file_form($form, &$form_state) {
   );
   $form['ingest'] = array(
     '#type' => 'submit',
-    '#value' => t('Ingest'),
+    '#value' => t('Upload'),
   );
   return $form;
 }
@@ -63,19 +58,33 @@ function islandora_chemistry_upload_file_form($form, &$form_state) {
  *   An array containing the Drupal form state.
  */
 function islandora_chemistry_upload_file_form_validate($form, &$form_state) {
+  $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
   $values = &$form_state['values'];
-  $chem_file = file_load($values['upload_file']);
-  if ($chem_file) {
-    $chem_file_mime = $chem_file->filemime;
+  $file = file_save_upload('file', array(
+    'file_validate_extensions' => array(),
+    'file_validate_size' => array($upload_size * 1024 * 1024),
+  ));
+  if ($file) {
+    $file = file_move($file, 'temporary://');
+    if ($file) {
+      $form_state['storage']['file'] = $file;
+    }
+    else {
+      form_set_error('file', t("Failed to write the uploaded file to the site's file folder."));
+    }
+    $chem_file_mime = $file->filemime;
+    if ($file && !$values['type_select_check']) {
+      module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
+      if (in_array($chem_file_mime, array('application/x-zip', 'application/zip'))) {
+        form_error($form['type_select_check'], t('A type is required when uploading a ZIP.'));
+      }
+      elseif (!in_array($chem_file_mime, array_keys(islandora_chemistry_get_chemistry_mimes()))) {
+        form_error($form['type_select_check'], t("The file's type couldn't be parsed please select a type."));
+      }
+    }
   }
-  if ($chem_file && !$values['type_select_check']) {
-    module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
-    if (in_array($chem_file_mime, array('application/x-zip', 'application/zip'))) {
-      form_error($form['type_select_check'], t('A type is required when ingesting a ZIP.'));
-    }
-    elseif (!in_array($chem_file_mime, array_keys(islandora_chemistry_get_chemistry_mimes()))) {
-      form_error($form['type_select_check'], t("The file's type couldn't be parsed please select a type."));
-    }
+  else {
+    form_set_error('file', t('No file was uploaded.'));
   }
 }
 
@@ -94,7 +103,7 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
   $policy = new CollectionPolicy($collection['COLLECTION_POLICY']->content);
   $policy_content_models = $policy->getContentModels();
   $default_namespace = islandora_get_namespace($policy_content_models['islandora:sp_chem_CM']['namespace']);
-  $file = file_load($form_state['values']['upload_file']);
+  $file = $form_state['storage']['file'];
 
   if ($form_state['values']['type_select_check'] && $form_state['values']['options'] == 'other') {
     $content_model = 'islandora:binaryObjectCModel';
