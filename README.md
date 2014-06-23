@@ -19,10 +19,15 @@ This module requires the following modules/libraries:
 * [ChemDoodleWeb](http://web.chemdoodle.com/) - Is used as a viewer for the object and allows a 3D representation of the molecule to be displayed. It is also used as a molecule editor so that structures can be used for searching.
 * [Indigo Python API](http://ggasoftware.com/opensource/indigo) - Is required to be installed as a Drupal library as the directory `indigo-python` to create and search for molecular fingerprints.  Indigo requires at least Python version 2.6.6 to run.
 * [Checkmol](http://merian.pch.univie.ac.at/~nhaider/cheminf/cmmm.html) - Required to identify functional groups in the molecule and allow searching based on that.
+* [GeSHi](http://sourceforge.net/projects/geshi) - Required for syntax highlighting.
 
 ## Installation
 
-Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
+For the module itself, install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
+
+For ChemDoodleWeb, [download](http://web.chemdoodle.com/installation/download) and unzip the library such that the `ChemDoodleWeb.js` is located in `sites/all/libraries/ChemDoodleWeb/install/ChemDoodleWeb.js`.
+
+For GeSHi, [download](http://sourceforge.net/projects/geshi/files/latest/download) and unzip the library such that `geshi.php` is located in `sites/all/libraries/geshi/geshi.php`.
 
 ## Configuration
 

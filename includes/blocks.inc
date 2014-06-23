@@ -158,6 +158,30 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
  *   A renderable array of a Drupal form.
  */
 function islandora_chemistry_structure_search_form($form, &$form_state) {
+  // Grab mol from session if available.
+  $inchikey_solr_field = islandora_solr_lesser_escape(
+    variable_get(
+      'islandora_chemistry_inchikey_solr_field',
+      'cml_molecule_metadataList_mods_identifier_inchikey_ms'
+    )
+  );
+  $matches = array();
+  $match = preg_match("/$inchikey_solr_field\:\(?\"(.*)\"\(?/", current_path(), $matches);
+  if ($match) {
+    $inchikey = $matches[1];
+  }
+  if (isset($inchikey)) {
+    if (isset($_SESSION['islandora_chemistry_inchikeys'][$inchikey])) {
+      $mol = $_SESSION['islandora_chemistry_inchikeys'][$inchikey];
+    }
+  }
+  // XXX There is a small chance of leaking memory from this cache if an
+  // exception occurs between the submit handler and building the form. More
+  // utility can be gained to including the mol files in the db.
+  if (isset($_SESSION['islandora_chemistry_inchikeys']) &&
+    count($_SESSION['islandora_chemistry_inchikeys']) >= 5) {
+    array_shift($_SESSION['islandora_chemistry_inchikeys']);
+  }
   $chem_doodle_path = libraries_get_path('ChemDoodleWeb');
   $chem_path = drupal_get_path('module', 'islandora_chemistry');
   $element_id = drupal_html_id('islandora_chemistry_sketcher_canvas');
@@ -191,6 +215,7 @@ function islandora_chemistry_structure_search_form($form, &$form_state) {
   );
   $form['mol_value'] = array(
     '#type' => 'hidden',
+    '#default_value' => isset($mol) ? $mol : NULL,
   );
   $form['search_type'] = array(
     '#type' => 'radios',
@@ -254,6 +279,9 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
   module_load_include('inc', 'islandora_solr', 'includes/utilities');
 
   $mol = $form_state['values']['mol_value'];
+  $inchi_key = islandora_chemistry_get_inchikey_from_mol($mol);
+  $_SESSION['islandora_chemistry_inchikeys'][$inchi_key] = $mol;
+
   $search_type = $form_state['values']['search_type'];
   $inchi_key_solr_field = islandora_solr_lesser_escape(
     variable_get(
@@ -262,7 +290,6 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
     )
   );
   if ($search_type == 'inchi') {
-    $inchi_key = islandora_chemistry_get_inchikey_from_mol($mol);
     $query = format_string('!inchi_field:"!inchi_key"', array(
       '!inchi_field' => $inchi_key_solr_field,
       '!inchi_key' => $inchi_key,
@@ -306,7 +333,6 @@ function islandora_chemistry_structure_search_form_submit($form, &$form_state) {
       FALSE,
       $options
     );
-    $inchi_key = islandora_chemistry_get_inchikey_from_mol($mol);
 
     // This retrieves all parts of the fingerprint from the table, or inserts
     // the new structure to avoid running identical calls in the future.
