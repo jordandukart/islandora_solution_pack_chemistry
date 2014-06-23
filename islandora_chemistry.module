@@ -123,6 +123,9 @@ function islandora_chemistry_islandora_sp_chem_CM_islandora_view_object($object,
 /**
  * Access callback for 3D molecule view.
  *
+ * @param AbstractObject $object
+ *   The object in which the MOL file belongs to.
+ *
  * @return bool
  *   TRUE if the tab should be displayed; otherwise, FALSE.
  */
@@ -132,6 +135,11 @@ function islandora_chemistry_3d_view_access(AbstractObject $object) {
 
 /**
  * Access callback for output view.
+ *
+ * @param AbstractObject $object
+ *   The object in to check.
+ * @param string $dsid
+ *   The datastream to check.
  *
  * @return bool
  *   TRUE if the tab should be displayed; otherwise, FALSE.
@@ -300,14 +308,8 @@ function islandora_chemistry_islandora_sp_chem_cm_islandora_derivative() {
  * mapping would be "chemical/x-gamess-output".
  */
 function islandora_chemistry_file_mimetype_mapping_alter(&$mapping) {
-  $chem_filter = function ($mimetype) {
-    return strpos($mimetype, 'chemical/') === 0;
-  };
-
   $mime_detect = new MimeDetect();
   $types = $mime_detect->getMimeTypes();
-  $filtered_types = array_filter($types, $chem_filter);
-
   $intersect = array_intersect_key($types, $mapping['extensions']);
   foreach ($intersect as $ext => $mime) {
     $keys = array_keys($mapping['mimetypes'], $mime);
