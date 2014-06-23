@@ -139,10 +139,7 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
     $ds->mimetype = $mimetype;
     $ds->setContentFromFile($file->uri, FALSE);
     $tuque->repository->ingestObject($object);
-    drupal_set_message(t(
-      'Object ingested at <a href="@url">@id</a>',
-      array('@url' => url("islandora/object/{$object->id}"), '@id' => $object->id)
-    ));
+    $form_state['redirect'] = "islandora/object/{$object->id}";
   }
 }
 
