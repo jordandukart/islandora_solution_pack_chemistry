@@ -29,7 +29,7 @@ function islandora_chemistry_upload_file_form($form, &$form_state) {
       'Select file to upload.<br/>Files must be less than <strong>@size MB</strong>.',
       array('@size' => $upload_size)
     ),
-    '#default_value' => isset($form_state['values']['upload_file']) ? $form_state['values']['upload_file'] : FALSE,
+    '#default_value' => isset($form_state['storage']['file']) ? $form_state['storage']['file'] : FALSE,
   );
   $form['type_select_check'] = array(
     '#type' => 'checkbox',
@@ -121,7 +121,7 @@ function islandora_chemistry_upload_file_form_submit($form, &$form_state) {
 
   if (in_array($file->filemime, array('application/x-zip', 'application/zip'))) {
     $params = array(
-      'file' => file_load($form_state['values']['upload_file']),
+      'file' => $file,
       'pid_namespace' => $default_namespace,
       'content_model' => array($content_model),
       'processed_objects' => array(),
