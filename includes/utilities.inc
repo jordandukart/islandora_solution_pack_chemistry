@@ -219,9 +219,16 @@ function islandora_chemistry_get_synonyms_from_cactus($inchi_key) {
 
   $map_key_to_results = function ($key) {
     $doc = new DOMDocument();
-    $doc->load("http://cactus.nci.nih.gov/chemical/structure/$key/names/xml");
-    $xpath = new DOMXPath($doc);
     $synonyms = array();
+    $cactus_response = drupal_http_request(
+      "http://cactus.nci.nih.gov/chemical/structure/$key/names/xml",
+      array('timeout' => 5)
+    );
+    if ($cactus_response->code != 200) {
+      return $synonyms;
+    }
+    $doc->loadXML($cactus_response->data);
+    $xpath = new DOMXPath($doc);
     foreach ($xpath->query('/request/data/item') as $item) {
       $synonyms[$item->getAttribute('classification')][] = (string) $item->nodeValue;
     }
