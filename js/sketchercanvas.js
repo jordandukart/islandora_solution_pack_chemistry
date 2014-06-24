@@ -19,6 +19,11 @@
                     var wmol = new ChemDoodle.io.MOLInterpreter();
                     $(chem_settings.hidden_field_selector).val(wmol.write(mol));
                 }
+                // This is to handle a poorly understood Safari rendering bug where the second
+                // row of buttons will render each button on it's own row.
+                setTimeout(function() {
+                  $('.ui-helper-hidden-accessible').css('position', 'relative');
+                }, 2000);
             });
         }
     };
