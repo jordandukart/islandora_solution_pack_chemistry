@@ -109,34 +109,42 @@ function islandora_chemistry_get_rdf_from_chemspider($inchi_key) {
  *   anything.
  */
 function islandora_chemistry_get_title(AbstractObject $object) {
-  if (!(isset($object['CML']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $object['CML']))) {
-    // Do not have CML to fetch from...
-    return FALSE;
-  }
+  if (isset($object['CML'])) {
+    $cml = new SimpleXMLElement($object['CML']->content);
+    $cml->registerXPathNamespace('cml', 'http://www.xml-cml.org/schema');
+    $cml->registerXPathNamespace('mods', 'http://www.loc.gov/mods/v3');
 
-  $cml = new SimpleXMLElement($object['CML']->content);
-  $cml->registerXPathNamespace('cml', 'http://www.xml-cml.org/schema');
-  $cml->registerXPathNamespace('mods', 'http://www.loc.gov/mods/v3');
+    // Attempt to use IUPAC:trivial name.
+    $titles = $cml->xpath('/cml:molecule/cml:metadataList[@convention="islandora:sp_chem_CM"]/mods:mods/mods:titleInfo[@type="uniform"]/mods:title');
+    $title_element = reset($titles);
+    if ($title_element) {
+      $raw_title = (string) $title_element;
+      $title = ucfirst(strtolower(ltrim($raw_title)));
+      return $title;
+    }
 
-  // Attempt to use IUPAC:trivial name.
-  $titles = $cml->xpath('/cml:molecule/cml:metadataList[@convention="islandora:sp_chem_CM"]/mods:mods/mods:titleInfo[@type="uniform"]/mods:title');
-  $title_element = reset($titles);
-  if ($title_element) {
-    $raw_title = (string) $title_element;
-    $title = ucfirst(strtolower(ltrim($raw_title)));
-    return $title;
-  }
+    // Fall-back to trying to use synonyms.
+    $synonyms = $cml->xpath('/cml:molecule/cml:metadataList[@convention="islandora:sp_chem_CM"]/mods:mods/mods:titleInfo[@type="alternative"]/mods:title');
+    $reducer = function ($carry, $current) {
+      return array_merge($carry, explode(', ', (string) $current));
+    };
+    $synonym_strings = array_reduce($synonyms, $reducer, array());
+    $synonym = reset($synonym_strings);
+    if ($synonym) {
+      return $synonym;
+    }
 
-  // Fall-back to trying to use synonyms.
-  $synonyms = $cml->xpath('/cml:molecule/cml:metadataList[@convention="islandora:sp_chem_CM"]/mods:mods/mods:titleInfo[@type="alternative"]/mods:title');
-  $reducer = function ($carry, $current) {
-    return array_merge($carry, explode(', ', (string) $current));
-  };
-  $synonym_strings = array_reduce($synonyms, $reducer, array());
-  $synonym = reset($synonym_strings);
-  if ($synonym) {
-    return $synonym;
+    // Fall-back to trying to use formula.
+    $formulas = $cml->xpath('/cml:molecule/cml:metadataList[@convention="islandora:sp_chem_CM"]/mods:mods/mods:note[@type="formula"]');
+    $formula = reset($formulas);
+    if ($formula) {
+      return $formula;
+    }
   }
+  else {
+    return $object['OBJ']->label;
+  }
+  return FALSE;
 }
 
 /**
