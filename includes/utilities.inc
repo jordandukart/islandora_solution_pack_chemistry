@@ -141,7 +141,7 @@ function islandora_chemistry_get_title(AbstractObject $object) {
       return $formula;
     }
   }
-  else {
+  if ($object['OBJ']->label) {
     return $object['OBJ']->label;
   }
   return FALSE;
