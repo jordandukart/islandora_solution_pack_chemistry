@@ -66,12 +66,16 @@ function template_preprocess_islandora_chemistry(&$variables) {
   }
 
   module_load_include('inc', 'islandora', 'includes/metadata');
+  $module_path = drupal_get_path('module', 'islandora_chemistry');
   $variables['elements']['metadata'] = array(
     '#type' => 'markup',
     '#attached' => array(
       'js' => array(
         'misc/form.js',
         'misc/collapse.js',
+      ),
+      'css' => array(
+        "$module_path/css/islandora_chemistry.theme.css",
       ),
     ),
     '#markup' => islandora_retrieve_metadata_markup($variables['islandora_object'], TRUE),
