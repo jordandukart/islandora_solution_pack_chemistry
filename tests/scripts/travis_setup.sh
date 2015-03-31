@@ -7,5 +7,5 @@ sudo mv ./cmmmsrv /usr/local/bin
 sudo mv $TRAVIS_BUILD_DIR/tests/scripts/cmmmsrv.init /etc/init.d/cmmmsrv
 sudo chmod +x /etc/init.d/cmmmsrv
 sudo service cmmmsrv start
-wget "http://ggasoftware.com/downloads/indigo-1.1.12/indigo-python-1.1.12-linux.zip"
+wget "http://office.discoverygarden.ca/testfiles/indigo-python-1.1.12-linux.zip"
 unzip indigo-python-1.1.12-linux.zip
