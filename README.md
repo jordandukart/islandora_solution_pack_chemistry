@@ -20,6 +20,7 @@ This module requires the following modules/libraries:
 * [Indigo Python API](http://ggasoftware.com/opensource/indigo) - Is required to be installed as a Drupal library as the directory `indigo-python` to create and search for molecular fingerprints.  Indigo requires at least Python version 2.6.6 to run.
 * [Checkmol](http://merian.pch.univie.ac.at/~nhaider/cheminf/cmmm.html) - Required to identify functional groups in the molecule and allow searching based on that.
 * [GeSHi](http://sourceforge.net/projects/geshi) - Required for syntax highlighting.
+* Jumboconverter installed as a library under jumbo-converter as retrievium-importer.jar.
 
 ## Installation
 

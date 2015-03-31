@@ -23,6 +23,7 @@ function islandora_chemistry_uninstall() {
   islandora_install_solution_pack('islandora_chemistry', 'uninstall');
   $variables = array(
     'islandora_chemistry_python',
+    'islandora_chemistry_java',
     'islandora_chemistry_openbabel',
     'islandora_chemistry_obprop',
     'islandora_chemistry_inchikey_solr_field',

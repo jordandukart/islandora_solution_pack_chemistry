@@ -24,6 +24,7 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
     return isset($form_state['values'][$name]) ? $form_state['values'][$name] : variable_get($name, $default);
   };
   $python = $get_default_value('islandora_chemistry_python', '/usr/bin/python');
+  $java = $get_default_value('islandora_chemistry_java', 'java');
   $obabel = $get_default_value('islandora_chemistry_openbabel', '/usr/bin/obabel');
   $obprop = $get_default_value('islandora_chemistry_obprop', '/usr/bin/obprop');
   $cmmmsrv_host = $get_default_value('islandora_chemistry_cmmmsrv_host', 'localhost');
@@ -82,6 +83,21 @@ function islandora_chemistry_admin_settings_form(array $form, array &$form_state
       '#ajax' => array(
         'callback' => 'islandora_chemistry_admin_settings_form_ajax_callback',
         'wrapper' => 'python-wrapper',
+        'effect' => 'fade',
+        'event' => 'change',
+      ),
+    ),
+    'islandora_chemistry_java' => array(
+      '#prefix' => '<div id="java-wrapper">',
+      '#suffix' => '</div>',
+      '#type' => 'textfield',
+      '#title' => t('Java'),
+      '#description' => t('Java executable path<br/>!msg', array(
+                        '!msg' => islandora_executable_available_message($java))),
+      '#default_value' => $java,
+      '#ajax' => array(
+        'callback' => 'islandora_chemistry_admin_settings_form_ajax_callback',
+        'wrapper' => 'java-wrapper',
         'effect' => 'fade',
         'event' => 'change',
       ),
