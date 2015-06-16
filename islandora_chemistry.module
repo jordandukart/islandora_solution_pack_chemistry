@@ -332,3 +332,55 @@ function islandora_chemistry_process_islandora_solr_metadata_display(array &$var
     $variables['solr_fields'][$formula_field]['value'] = array_map('islandora_chemistry_format_molecular_formula', $variables['solr_fields'][$formula_field]['value']);
   }
 }
+
+/**
+ * Implements hook_islandora_bookmark_export_handler().
+ */
+function islandora_chemistry_islandora_bookmark_export_handler() {
+  $handlers = array(
+    'Chemistry' => array(
+      'Export Chemical Data' => 'islandora_chemistry_export_bookmark_objects',
+    ),
+  );
+  return $handlers;
+}
+
+/**
+ * Implements hook_islandora_bookmark_export_handler_alter().
+ */
+function islandora_chemistry_islandora_bookmark_export_handler_alter(&$handlers) {
+  $handlers = array_filter($handlers, function ($handler) {
+    return key($handler) == 'Export Chemical Data';
+  });
+}
+
+/**
+ * Exports a bookmark list with associated OBJs and CMLs.
+ *
+ * @param array $pids
+ *   An array of pids to be exported.
+ */
+function islandora_chemistry_export_bookmark_objects($pids) {
+  $zip = new ZipArchive();
+  $zip_uri = file_create_filename('chemistry_export.zip', 'temporary://');
+  $open = $zip->open(drupal_realpath($zip_uri), ZipArchive::CREATE);
+  if ($open === TRUE) {
+    foreach ($pids as $pid) {
+      $object = islandora_object_load($pid);
+      $escaped_pid = str_replace(':', '_', $object->id);
+      if (isset($object['OBJ'])) {
+        module_load_include('inc', 'islandora', 'includes/mimetype.utils');
+        $extension = islandora_get_extension_for_mimetype($object['OBJ']->mimetype);
+        $zip->addFromString("{$escaped_pid}_OBJ.$extension", $object['OBJ']->content);
+      }
+      if (isset($object['CML'])) {
+        $zip->addFromString("{$escaped_pid}_CML.xml", $object['CML']->content);
+      }
+    }
+    $zip->close();
+  }
+  drupal_add_http_header('Content-Type', 'application/zip');
+  drupal_add_http_header('Content-Disposition', 'attachment;filename="chemistry_export.zip"');
+  readfile($zip_uri);
+  drupal_exit();
+}
