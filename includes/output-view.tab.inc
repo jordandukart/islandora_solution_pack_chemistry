@@ -44,7 +44,7 @@ function islandora_chemistry_datastream_view(AbstractObject $object, $dsid = 'OB
   // Mapping of some text-based format to alternative MIME-type, to provided a
   // better-supported value to GeSHi.
   $alternative_mime_map = array(
-    'chemical/x-cml' => 'text/xml',
+    'chemical/x-cml' => 'application/xml',
   );
   $primary_type = substr($datastream->mimetype, 0, strpos($datastream->mimetype, '/'));
   if (in_array($datastream->mimetype, $text_chemical_mimes) || $primary_type == 'text') {
@@ -55,6 +55,8 @@ function islandora_chemistry_datastream_view(AbstractObject $object, $dsid = 'OB
     $mime_detect = new MimeDetect();
     $geshi = new GeSHi();
     $geshi->enable_classes();
+    // Override the default code style as it causes text-alignment issues.
+    $geshi->set_code_style('', FALSE);
     $geshi->set_header_type(GESHI_HEADER_DIV);
     $geshi->enable_line_numbers(GESHI_FANCY_LINE_NUMBERS, 10);
     $geshi->set_overall_class('islandora-chemistry-datastream-view');
