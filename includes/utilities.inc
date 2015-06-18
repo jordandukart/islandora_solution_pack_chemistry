@@ -55,7 +55,6 @@ function islandora_chemistry_get_chemistry_mimes() {
  *   -error: An string denoting an error that occured with the rquest.
  */
 function islandora_chemistry_get_rdf_from_chemspider($inchi_key) {
-  dsm($inchi_key);
   $chemspider_url = "http://rdf.chemspider.com";
   $options = array(
     'headers' => array(
