@@ -55,6 +55,7 @@ function islandora_chemistry_get_chemistry_mimes() {
  *   -error: An string denoting an error that occured with the rquest.
  */
 function islandora_chemistry_get_rdf_from_chemspider($inchi_key) {
+  dsm($inchi_key);
   $chemspider_url = "http://rdf.chemspider.com";
   $options = array(
     'headers' => array(
@@ -80,18 +81,18 @@ function islandora_chemistry_get_rdf_from_chemspider($inchi_key) {
     else {
       return array(
         'success' => FALSE,
-        'data' => $response->data,
-        'error' => $response->error,
-        'code' => $response->code,
+        'data' => isset($response->data) ? $response->data : FALSE,
+        'error' => isset($response->error) ? $response->error : FALSE,
+        'code' => isset($response->code) ? $response->code : FALSE,
       );
     }
   }
   else {
     return array(
       'success' => FALSE,
-      'data' => $response->data,
-      'error' => $response->error,
-      'code' => $response->code,
+      'data' => isset($response->data) ? $response->data : FALSE,
+      'error' => isset($response->error) ? $response->error : FALSE,
+      'code' => isset($response->code) ? $response->code : FALSE,
     );
   }
 }
