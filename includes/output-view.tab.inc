@@ -55,9 +55,11 @@ function islandora_chemistry_datastream_view(AbstractObject $object, $dsid = 'OB
     $mime_detect = new MimeDetect();
     $geshi = new GeSHi();
     $geshi->enable_classes();
-    // Override the default code style as it causes text-alignment issues,
-    // which is chrome specific.
+
+    // XXX: Override the default code style as it causes text-alignment issues,
+    // which is Chrome specific.
     $geshi->set_code_style('', FALSE);
+
     $geshi->set_header_type(GESHI_HEADER_DIV);
     $geshi->enable_line_numbers(GESHI_FANCY_LINE_NUMBERS, 10);
     $geshi->set_overall_class('islandora-chemistry-datastream-view');
