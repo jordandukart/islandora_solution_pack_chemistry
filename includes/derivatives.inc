@@ -351,29 +351,6 @@ function islandora_chemistry_derive_cml(AbstractObject $object, $force = FALSE) 
       'message_sub' => $subs,
       'type' => 'dsm',
     );
-
-    try {
-      module_load_include('inc', 'islandora_chemistry', 'includes/utilities');
-      $title = islandora_chemistry_get_title($object);
-      if (!empty($title) && $object->label != $title) {
-        $object->label = $title;
-        $to_return['messages'][] = array(
-          'message' => t('Set title of @id to "@title".'),
-          'message_sub' => $subs + array(
-            '@title' => $title,
-          ),
-          'type' => 'dsm',
-        );
-      }
-    }
-    catch (Exception $e) {
-      $to_return['success'] = FALSE;
-      $to_return['messages'][] = array(
-        'message' => t('Failed setting title of @id.'),
-        'message_sub' => $subs,
-        'type' => 'dsm',
-      );
-    }
   }
   catch (IslandoraChemistryDerivativeException $e) {
     $to_return['messages'][] = array(
@@ -528,4 +505,17 @@ function islandora_chemistry_derive_fingerprint(AbstractObject $object, $force =
     );
   }
   return $to_return;
+}
+
+/**
+ * Sets the label of the object based on the OBJ's filename.
+ *
+ * @param AbstractObject $object
+ *   An AbstractObject representing an object within Fedora.
+ *
+ * @param bool $force
+ *   Whether derivation creation is being forced or not.
+ */
+function islandora_chemistry_set_object_label(AbstractObject $object, $force = FALSE) {
+  $object->label = $object['OBJ']->label;
 }
