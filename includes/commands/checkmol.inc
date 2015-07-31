@@ -213,9 +213,9 @@ class Checkmol {
 
     $command_output = $this->runCommandOnFileOrStructure('checkmol:c', $mol);
     $filtered_output = array_filter(array_map($semi_trim, $command_output));
+    // Treat multiple molecules as if they are one.
     if (count($filtered_output) > 1) {
-      // Too many lines.
-      throw new UnexpectedOutputException('Too many lines returned from command.');
+      $filtered_output = array(implode(';', $filtered_output));
     }
     $output = reset($filtered_output);
     if ($output == static::HASHES . ' invalid molecule') {
