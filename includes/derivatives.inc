@@ -304,24 +304,31 @@ function islandora_chemistry_derive_cml(AbstractObject $object, $force = FALSE) 
   );
   try {
     $file_in = islandora_chemistry_derive_download_as_temp($object['OBJ']);
-    $java = variable_get('islandora_chemistry_java', 'java');
-    $jar = drupal_realpath(libraries_get_path('jumbo-converter') . '/retrievium-importer.jar');
-    $cml_dir = drupal_realpath(file_default_scheme() . '://');
-    $file_in_path = drupal_realpath($file_in->uri);
-    $cml_base = pathinfo($file_in_path, PATHINFO_FILENAME);
-    $cml_path = "$cml_dir/$cml_base.cml";
-    exec("$java -jar $jar -o $cml_dir $file_in_path");
-    file_delete($file_in);
-    if (is_file($cml_path)) {
-      $cml_string = file_get_contents($cml_path);
-      file_unmanaged_delete($cml_path);
+    // JUMBO currently does not support CML files, so just pass it down through.
+    if ($file_in->filemime != 'chemical/x-cml') {
+      $java = variable_get('islandora_chemistry_java', 'java');
+      $jar = drupal_realpath(libraries_get_path('jumbo-converter') . '/retrievium-importer.jar');
+      $cml_dir = drupal_realpath(file_default_scheme() . '://');
+      $file_in_path = drupal_realpath($file_in->uri);
+      $cml_base = pathinfo($file_in_path, PATHINFO_FILENAME);
+      $cml_path = "$cml_dir/$cml_base.cml";
+      exec("$java -jar $jar -o $cml_dir $file_in_path");
+      file_delete($file_in);
+      if (is_file($cml_path)) {
+        $cml_string = file_get_contents($cml_path);
+        file_unmanaged_delete($cml_path);
+      }
+      // Fallback to Open Bable if Jumbo fails.
+      if (!isset($cml_string)) {
+        module_load_include('inc', 'islandora_chemistry', 'includes/derive.cml');
+        $cml_string = islandora_chemistry_derive_string_from_openbabel($object, 'OBJ', array(
+          'o' => 'cml',
+        ));
+      }
     }
-    // Fallback to Open Bable if Jumbo fails.
-    if (!isset($cml_string)) {
-      module_load_include('inc', 'islandora_chemistry', 'includes/derive.cml');
-      $cml_string = islandora_chemistry_derive_string_from_openbabel($object, 'OBJ', array(
-        'o' => 'cml',
-      ));
+    else {
+      $cml_string = file_get_contents($file_in->uri);
+      file_delete($file_in);
     }
     $cml_doc = new DOMDocument();
     $cml_doc->formatOutput = TRUE;
