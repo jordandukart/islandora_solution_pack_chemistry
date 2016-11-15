@@ -15,7 +15,7 @@ before_install:
   - git clone -b 7.x git://github.com/Islandora/islandora.git
   - git clone -b 7.x git://github.com/Islandora/islandora_solution_pack_collection.git
   - git clone -b 7.x git://github.com/discoverygarden/islandora_binary_object.git
-  - git clone -b 7.x git://github.com:Islandora/islandora_importer.git
+  - git clone -b 7.x git://github.com/Islandora/islandora_importer.git
   - export ISLANDORA_DIR=$HOME/islandora
   - $HOME/islandora/tests/scripts/travis_setup.sh
   - $TRAVIS_BUILD_DIR/tests/scripts/travis_setup.sh
