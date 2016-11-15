@@ -25,7 +25,7 @@ before_install:
   - ln -s $HOME/islandora_solution_pack_collection sites/all/modules/islandora_solution_pack_collection
   - ln -s $HOME/islandora_binary_object sites/all/modules/islandora_binary_object
   - drush -y -u 1 dl libraries && drush -y -u 1 en libraries
-  - drush en --user=1 --yes islandora_basic_collection islandora_chemistry zip_importer
+  - drush en --user=1 --yes islandora_basic_collection islandora_chemistry islandora_importer
 script:
   - ant -buildfile sites/all/modules/islandora_solution_pack_chemistry/build.xml lint
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/islandora_solution_pack_chemistry
