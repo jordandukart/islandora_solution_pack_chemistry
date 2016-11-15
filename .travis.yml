@@ -24,6 +24,7 @@ before_install:
   - ln -s $TRAVIS_BUILD_DIR sites/all/modules/islandora_solution_pack_chemistry
   - ln -s $HOME/islandora_solution_pack_collection sites/all/modules/islandora_solution_pack_collection
   - ln -s $HOME/islandora_binary_object sites/all/modules/islandora_binary_object
+  - ln -s $HOME/islandora_importer sites/all/modules/islandora_importer
   - drush -y -u 1 dl libraries && drush -y -u 1 en libraries
   - drush en --user=1 --yes islandora_basic_collection islandora_chemistry islandora_importer
 script:
